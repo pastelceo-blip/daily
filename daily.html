@@ -569,285 +569,439 @@
             border-left: 4px solid #ef4444;
         }
         
-        /* 모바일 반응형 개선 */
+        /* 갤럭시 S25 및 최신 모바일 최적화 */
         @media (max-width: 768px) {
             .container { 
-                padding: 10px; 
+                padding: 8px; 
                 max-width: 100%;
             }
             
             .header { 
-                padding: 20px 15px; 
-                margin-bottom: 15px;
+                padding: 16px 12px; 
+                margin-bottom: 12px;
+                border-radius: 12px;
             }
             
             .header h1 { 
-                font-size: 1.6rem; 
-                margin-bottom: 6px;
+                font-size: 1.5rem; 
+                margin-bottom: 4px;
+                line-height: 1.2;
             }
             
             .header p {
-                font-size: 0.85rem;
+                font-size: 0.8rem;
+                opacity: 0.9;
             }
             
             .date-controls {
-                margin: 15px 0;
-                gap: 10px;
+                margin: 12px 0;
+                gap: 8px;
             }
             
             .date-nav {
-                padding: 10px 15px;
-                gap: 10px;
+                padding: 8px 12px;
+                gap: 8px;
+                border-radius: 10px;
             }
             
             .nav-btn {
                 padding: 6px 10px;
-                font-size: 0.8rem;
+                font-size: 0.75rem;
+                border-radius: 6px;
+                min-height: 32px;
             }
             
             .date-display {
-                font-size: 0.9rem;
-                min-width: 150px;
+                font-size: 0.85rem;
+                min-width: 140px;
             }
             
             .weekly-progress-section {
-                padding: 15px;
-                margin-bottom: 15px;
+                padding: 12px;
+                margin-bottom: 12px;
+                border-radius: 12px;
             }
             
             .weekly-progress-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
-                margin-bottom: 12px;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                gap: 6px;
+                margin-bottom: 10px;
             }
             
             .weekly-progress-title {
-                font-size: 1.1rem;
+                font-size: 1rem;
+            }
+            
+            .weekly-average {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+                border-radius: 12px;
             }
             
             .weekly-chart { 
-                height: 100px;
-                gap: 4px;
-                padding: 10px 0;
+                height: 90px;
+                gap: 3px;
+                padding: 8px 0;
             }
             
             .bar-container { 
-                height: 80px;
+                height: 70px;
+                border-radius: 4px 4px 2px 2px;
             }
             
             .bar-percentage {
-                font-size: 0.65rem;
-                top: -15px;
+                font-size: 0.6rem;
+                top: -14px;
+                padding: 1px 3px;
+                border-radius: 2px;
             }
             
             .day-label {
-                font-size: 0.75rem;
-                margin-top: 6px;
+                font-size: 0.7rem;
+                margin-top: 4px;
             }
             
             .current-time-section {
-                padding: 15px;
-                margin-bottom: 12px;
+                padding: 12px;
+                margin-bottom: 10px;
+                border-radius: 10px;
             }
             
             .current-time {
-                font-size: 1.5rem;
-                margin-bottom: 8px;
+                font-size: 1.4rem;
+                margin-bottom: 6px;
             }
             
             .current-task {
-                font-size: 0.9rem;
-                padding: 10px;
+                font-size: 0.85rem;
+                padding: 8px;
+                border-radius: 6px;
             }
             
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-                margin-bottom: 15px;
-            }
-            
-            .stat-card {
-                padding: 12px;
-            }
-            
-            .stat-icon {
-                font-size: 1.3rem;
-                margin-bottom: 6px;
-            }
-            
-            .stat-title {
-                font-size: 0.75rem;
-                margin-bottom: 5px;
-            }
-            
-            .stat-value {
-                font-size: 1.2rem;
-                margin-bottom: 6px;
-            }
-            
-            .completion-celebration {
-                padding: 15px;
-                margin-bottom: 12px;
-            }
-            
-            .completion-celebration h2 {
-                font-size: 1.2rem;
-                margin-bottom: 6px;
-            }
-            
-            .memo-section { 
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-            
-            .memo-header { 
-                flex-direction: column; 
-                align-items: flex-start; 
-                gap: 6px; 
-                margin-bottom: 12px;
-            }
-            
-            .memo-header h3 {
-                font-size: 1rem;
-            }
-            
-            .memo-info {
-                font-size: 0.75rem;
-            }
-            
-            #permanentMemo {
-                min-height: 80px;
-                padding: 12px;
-                font-size: 0.85rem;
-            }
-            
-            .memo-footer { 
-                flex-direction: column; 
-                gap: 8px; 
-                align-items: flex-start; 
-                margin-top: 10px;
-            }
-            
-            .memo-save-btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
-                align-self: stretch;
-                text-align: center;
-            }
-            
-            .checklist-container {
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-            
-            .checklist-header {
-                flex-direction: column;
-                align-items: flex-start;
                 gap: 8px;
                 margin-bottom: 12px;
             }
             
-            .checklist-title {
+            .stat-card {
+                padding: 10px;
+                border-radius: 10px;
+            }
+            
+            .stat-icon {
+                font-size: 1.2rem;
+                margin-bottom: 4px;
+            }
+            
+            .stat-title {
+                font-size: 0.7rem;
+                margin-bottom: 3px;
+            }
+            
+            .stat-value {
                 font-size: 1.1rem;
+                margin-bottom: 4px;
+            }
+            
+            .progress-bar {
+                height: 6px;
+            }
+            
+            .completion-celebration {
+                padding: 12px;
+                margin-bottom: 10px;
+                border-radius: 10px;
+            }
+            
+            .completion-celebration h2 {
+                font-size: 1.1rem;
+                margin-bottom: 4px;
+            }
+            
+            .completion-celebration p {
+                font-size: 0.8rem;
+            }
+            
+            .memo-section { 
+                padding: 12px;
+                margin-bottom: 12px;
+                border-radius: 12px;
+            }
+            
+            .memo-header { 
+                margin-bottom: 8px;
+                padding-bottom: 6px;
+            }
+            
+            .memo-header h3 {
+                font-size: 0.95rem;
+            }
+            
+            .memo-info {
+                font-size: 0.7rem;
+            }
+            
+            #permanentMemo {
+                min-height: 70px;
+                padding: 10px;
+                font-size: 0.8rem;
+                border-radius: 8px;
+            }
+            
+            .memo-footer { 
+                margin-top: 8px;
+            }
+            
+            .memo-count {
+                font-size: 0.7rem;
+            }
+            
+            .memo-save-btn {
+                padding: 6px 12px;
+                font-size: 0.75rem;
+                border-radius: 6px;
+            }
+            
+            .checklist-container {
+                padding: 12px;
+                margin-bottom: 12px;
+                border-radius: 12px;
+            }
+            
+            .checklist-header {
+                margin-bottom: 10px;
+                padding-bottom: 6px;
+            }
+            
+            .checklist-title {
+                font-size: 1rem;
             }
             
             .completion-badge {
-                font-size: 0.75rem;
-                padding: 5px 10px;
+                font-size: 0.7rem;
+                padding: 4px 8px;
+                border-radius: 12px;
             }
             
-            .checklist-item { 
-                padding: 10px;
-                flex-direction: column;
-                align-items: flex-start;
+            .checklist {
                 gap: 6px;
             }
             
+            .checklist-item { 
+                padding: 8px;
+                border-radius: 8px;
+                min-height: 44px; /* 터치 영역 확보 */
+            }
+            
             .checklist-item.current-time::before {
-                top: -8px;
+                top: -6px;
+                right: 6px;
+                font-size: 0.55rem;
+                padding: 2px 4px;
+                border-radius: 8px;
+            }
+            
+            .checkbox {
+                width: 18px;
+                height: 18px;
+                margin-right: 10px;
+                flex-shrink: 0;
+            }
+            
+            .time-badge { 
+                font-size: 0.65rem;
+                padding: 4px 6px;
+                border-radius: 4px;
+                margin-right: 8px;
+                min-width: 80px;
+                flex-shrink: 0;
+            }
+            
+            .task-text {
+                font-size: 0.8rem;
+                line-height: 1.3;
+            }
+            
+            .save-indicator {
+                bottom: 12px;
+                right: 12px;
+                padding: 8px 12px;
+                font-size: 0.75rem;
+                border-radius: 20px;
+            }
+            
+            .notification {
+                top: 8px;
                 right: 8px;
-                font-size: 0.6rem;
-                padding: 2px 6px;
+                left: 8px;
+                padding: 8px 10px;
+                font-size: 0.8rem;
+                border-radius: 8px;
+            }
+        }
+        
+        /* 갤럭시 S25 Ultra 및 고해상도 화면 (393px 기준) */
+        @media (max-width: 430px) {
+            .container {
+                padding: 6px;
+            }
+            
+            .header {
+                padding: 14px 10px;
+                margin-bottom: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+                margin-bottom: 3px;
+            }
+            
+            .header p {
+                font-size: 0.75rem;
+            }
+            
+            .date-nav {
+                padding: 6px 10px;
+                gap: 6px;
+            }
+            
+            .nav-btn {
+                padding: 5px 8px;
+                font-size: 0.7rem;
+                min-height: 30px;
+            }
+            
+            .date-display {
+                font-size: 0.8rem;
+                min-width: 130px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            
+            .stat-card {
+                padding: 8px;
+            }
+            
+            .stat-icon {
+                font-size: 1.1rem;
+                margin-bottom: 3px;
+            }
+            
+            .stat-title {
+                font-size: 0.65rem;
+                margin-bottom: 2px;
+            }
+            
+            .stat-value {
+                font-size: 1rem;
+                margin-bottom: 3px;
+            }
+            
+            .current-time {
+                font-size: 1.2rem;
+                margin-bottom: 5px;
+            }
+            
+            .current-task {
+                font-size: 0.8rem;
+                padding: 6px;
+            }
+            
+            .weekly-chart {
+                height: 75px;
+                gap: 2px;
+                padding: 6px 0;
+            }
+            
+            .bar-container {
+                height: 60px;
+            }
+            
+            .bar-percentage {
+                font-size: 0.55rem;
+                top: -12px;
+            }
+            
+            .day-label {
+                font-size: 0.65rem;
+                margin-top: 3px;
+            }
+            
+            .checklist-item {
+                padding: 6px;
+                min-height: 40px;
             }
             
             .checkbox {
                 width: 16px;
                 height: 16px;
-                margin-right: 0;
-                margin-bottom: 4px;
-                order: 3;
-                align-self: flex-end;
+                margin-right: 8px;
             }
             
-            .time-badge { 
-                min-width: auto;
-                width: 100%;
-                font-size: 0.7rem;
-                padding: 5px 8px;
-                text-align: left;
-                order: 1;
-                margin-right: 0;
-                margin-bottom: 4px;
+            .time-badge {
+                font-size: 0.6rem;
+                padding: 3px 5px;
+                margin-right: 6px;
+                min-width: 75px;
             }
             
             .task-text {
-                font-size: 0.85rem;
-                order: 2;
-                margin-bottom: 6px;
+                font-size: 0.75rem;
+                line-height: 1.2;
             }
             
-            .save-indicator {
-                bottom: 15px;
-                right: 15px;
-                padding: 10px 15px;
-                font-size: 0.8rem;
-            }
-            
-            .notification {
-                top: 10px;
-                right: 10px;
-                left: 10px;
-                padding: 10px 12px;
-                font-size: 0.85rem;
+            #permanentMemo {
+                min-height: 60px;
+                padding: 8px;
+                font-size: 0.75rem;
             }
         }
         
-        /* 더 작은 화면용 추가 최적화 */
-        @media (max-width: 480px) {
-            .container {
-                padding: 8px;
-            }
-            
-            .header {
-                padding: 15px 10px;
-            }
-            
-            .header h1 {
-                font-size: 1.4rem;
-            }
-            
+        /* 접이식 폰 및 매우 작은 화면 */
+        @media (max-width: 360px) {
             .stats-grid {
                 grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            
-            .current-time {
-                font-size: 1.3rem;
-            }
-            
-            .current-task {
-                font-size: 0.8rem;
-                padding: 8px;
+                gap: 5px;
             }
             
             .weekly-chart {
-                height: 80px;
-                gap: 2px;
+                height: 65px;
+                gap: 1px;
             }
             
             .bar-container {
-                height: 60px;
+                height: 50px;
+            }
+            
+            .checklist-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+                padding: 8px;
+            }
+            
+            .checkbox {
+                order: 3;
+                align-self: flex-end;
+                margin: 0;
+            }
+            
+            .time-badge {
+                order: 1;
+                width: 100%;
+                text-align: left;
+                margin: 0 0 3px 0;
+            }
+            
+            .task-text {
+                order: 2;
+                margin-bottom: 4px;
             }
         }
     </style>
