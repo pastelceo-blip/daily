@@ -1,4 +1,575 @@
-/* 모바일 반응형 개선 */
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>용현이의 데일리 스케줄</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --background: #fafafa;
+            --surface: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .date-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .date-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--surface);
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+        
+        .nav-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        
+        .nav-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .date-display {
+            font-size: 1rem;
+            font-weight: 600;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        /* 주간 달성률 그래프 스타일 */
+        .weekly-progress-section {
+            background: var(--surface);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .weekly-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .weekly-progress-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .weekly-average {
+            background: var(--success);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .weekly-chart {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 6px;
+            height: 150px;
+            margin: 15px 0;
+            padding: 15px 0;
+        }
+
+        .day-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .bar-container {
+            width: 100%;
+            height: 120px;
+            background: #f3f4f6;
+            border-radius: 6px 6px 3px 3px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .bar-container:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .bar-fill {
+            width: 100%;
+            background: linear-gradient(180deg, var(--success), var(--primary));
+            border-radius: 3px 3px 0 0;
+            position: absolute;
+            bottom: 0;
+            transition: height 0.5s ease;
+        }
+
+        .bar-percentage {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: white;
+            padding: 1px 4px;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .day-label {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .day-bar.today .day-label {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .day-bar.today .bar-container {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        
+        .current-time-section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .current-time {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .current-task {
+            font-size: 1rem;
+            padding: 12px;
+            background: #fef3c7;
+            border-radius: 8px;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: var(--surface);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        
+        .stat-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            transition: width 0.3s ease;
+        }
+        
+        .completion-celebration {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .completion-celebration.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .completion-celebration h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+        
+        .completion-celebration p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .memo-section {
+            background: var(--surface);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        
+        .memo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .memo-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .memo-info {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        #permanentMemo {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.2s;
+            background: #f9fafb;
+        }
+        
+        #permanentMemo:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--surface);
+        }
+        
+        #permanentMemo::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .memo-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+        
+        .memo-count {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .memo-save-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .memo-save-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .memo-save-btn.saved {
+            background: var(--success);
+        }
+
+        .checklist-container {
+            background: var(--surface);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        
+        .checklist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .checklist-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .completion-badge {
+            background: var(--success);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .checklist {
+            display: grid;
+            gap: 8px;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .checklist-item:hover {
+            background: var(--surface);
+            border-color: var(--border);
+        }
+        
+        .checklist-item.completed {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+        
+        .checklist-item.current-time {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 3px solid var(--warning);
+            animation: pulse 2s infinite;
+        }
+        
+        .checklist-item.current-time::before {
+            content: "🔥 지금 할 시간!";
+            position: absolute;
+            top: -10px;
+            right: 12px;
+            background: var(--warning);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+        
+        .checklist-item.next-task {
+            background: #e0f2fe;
+            border-color: #0ea5e9;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: var(--primary);
+            transform: scale(1.1);
+        }
+        
+        .time-badge {
+            background: var(--primary);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 12px;
+            min-width: 90px;
+            text-align: center;
+        }
+        
+        .checklist-item.completed .time-badge {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .task-text {
+            flex: 1;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .save-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        .save-indicator.saving {
+            background: var(--warning);
+            animation: pulse 1s infinite;
+        }
+        
+        .save-indicator.saved {
+            background: var(--success);
+        }
+        
+        .save-indicator.error {
+            background: #ef4444;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 15px 20px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+        
+        .notification.error {
+            border-left: 4px solid #ef4444;
+        }
+        
+        /* 모바일 반응형 개선 */
         @media (max-width: 768px) {
             .container { 
                 padding: 10px; 
@@ -7,204 +578,204 @@
             
             .header { 
                 padding: 20px 15px; 
-                margin-bottom: 20px;
+                margin-bottom: 15px;
             }
             
             .header h1 { 
-                font-size: 1.8rem; 
-                margin-bottom: 8px;
+                font-size: 1.6rem; 
+                margin-bottom: 6px;
             }
             
             .header p {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
             
             .date-controls {
-                margin: 20px 0;
+                margin: 15px 0;
                 gap: 10px;
             }
             
             .date-nav {
-                padding: 12px 15px;
+                padding: 10px 15px;
                 gap: 10px;
             }
             
             .nav-btn {
-                padding: 8px 12px;
-                font-size: 0.85rem;
+                padding: 6px 10px;
+                font-size: 0.8rem;
             }
             
             .date-display {
-                font-size: 1rem;
+                font-size: 0.9rem;
                 min-width: 150px;
             }
             
             .weekly-progress-section {
-                padding: 20px 15px;
-                margin-bottom: 20px;
+                padding: 15px;
+                margin-bottom: 15px;
             }
             
             .weekly-progress-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
-                margin-bottom: 20px;
-            }
-            
-            .weekly-progress-title {
-                font-size: 1.2rem;
-            }
-            
-            .weekly-chart { 
-                height: 120px;
-                gap: 4px;
-                padding: 15px 0;
-            }
-            
-            .bar-container { 
-                height: 100px;
-            }
-            
-            .bar-percentage {
-                font-size: 0.7rem;
-                top: -20px;
-            }
-            
-            .day-label {
-                font-size: 0.8rem;
-                margin-top: 8px;
-            }
-            
-            .current-time-section {
-                padding: 20px 15px;
-                margin-bottom: 15px;
-            }
-            
-            .current-time {
-                font-size: 2rem;
+                gap: 8px;
                 margin-bottom: 12px;
             }
             
-            .current-task {
+            .weekly-progress-title {
                 font-size: 1.1rem;
-                padding: 12px;
+            }
+            
+            .weekly-chart { 
+                height: 100px;
+                gap: 4px;
+                padding: 10px 0;
+            }
+            
+            .bar-container { 
+                height: 80px;
+            }
+            
+            .bar-percentage {
+                font-size: 0.65rem;
+                top: -15px;
+            }
+            
+            .day-label {
+                font-size: 0.75rem;
+                margin-top: 6px;
+            }
+            
+            .current-time-section {
+                padding: 15px;
+                margin-bottom: 12px;
+            }
+            
+            .current-time {
+                font-size: 1.5rem;
+                margin-bottom: 8px;
+            }
+            
+            .current-task {
+                font-size: 0.9rem;
+                padding: 10px;
             }
             
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-                margin-bottom: 20px;
+                gap: 12px;
+                margin-bottom: 15px;
             }
             
             .stat-card {
-                padding: 15px;
+                padding: 12px;
             }
             
             .stat-icon {
-                font-size: 1.5rem;
-                margin-bottom: 8px;
-            }
-            
-            .stat-title {
-                font-size: 0.8rem;
+                font-size: 1.3rem;
                 margin-bottom: 6px;
             }
             
+            .stat-title {
+                font-size: 0.75rem;
+                margin-bottom: 5px;
+            }
+            
             .stat-value {
-                font-size: 1.4rem;
-                margin-bottom: 8px;
+                font-size: 1.2rem;
+                margin-bottom: 6px;
             }
             
             .completion-celebration {
-                padding: 20px 15px;
-                margin-bottom: 20px;
+                padding: 15px;
+                margin-bottom: 12px;
             }
             
             .completion-celebration h2 {
-                font-size: 1.5rem;
-                margin-bottom: 10px;
+                font-size: 1.2rem;
+                margin-bottom: 6px;
             }
             
             .memo-section { 
-                padding: 20px 15px;
-                margin-bottom: 20px;
+                padding: 15px;
+                margin-bottom: 15px;
             }
             
             .memo-header { 
                 flex-direction: column; 
                 align-items: flex-start; 
-                gap: 8px; 
-                margin-bottom: 15px;
+                gap: 6px; 
+                margin-bottom: 12px;
             }
             
             .memo-header h3 {
-                font-size: 1.2rem;
+                font-size: 1rem;
             }
             
             .memo-info {
-                font-size: 0.8rem;
+                font-size: 0.75rem;
             }
             
             #permanentMemo {
-                min-height: 120px;
-                padding: 15px;
-                font-size: 0.9rem;
+                min-height: 80px;
+                padding: 12px;
+                font-size: 0.85rem;
             }
             
             .memo-footer { 
                 flex-direction: column; 
-                gap: 10px; 
+                gap: 8px; 
                 align-items: flex-start; 
-                margin-top: 12px;
+                margin-top: 10px;
             }
             
             .memo-save-btn {
-                padding: 8px 16px;
-                font-size: 0.85rem;
+                padding: 6px 12px;
+                font-size: 0.8rem;
                 align-self: stretch;
                 text-align: center;
             }
             
             .checklist-container {
-                padding: 20px 15px;
-                margin-bottom: 20px;
+                padding: 15px;
+                margin-bottom: 15px;
             }
             
             .checklist-header {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
-                margin-bottom: 20px;
+                gap: 8px;
+                margin-bottom: 12px;
             }
             
             .checklist-title {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
             
             .completion-badge {
-                font-size: 0.8rem;
-                padding: 6px 12px;
+                font-size: 0.75rem;
+                padding: 5px 10px;
             }
             
             .checklist-item { 
-                padding: 12px;
+                padding: 10px;
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 8px;
+                gap: 6px;
             }
             
             .checklist-item.current-time::before {
                 top: -8px;
-                right: 10px;
-                font-size: 0.7rem;
-                padding: 3px 8px;
+                right: 8px;
+                font-size: 0.6rem;
+                padding: 2px 6px;
             }
             
             .checkbox {
-                width: 20px;
-                height: 20px;
+                width: 16px;
+                height: 16px;
                 margin-right: 0;
-                margin-bottom: 5px;
+                margin-bottom: 4px;
                 order: 3;
                 align-self: flex-end;
             }
@@ -212,33 +783,33 @@
             .time-badge { 
                 min-width: auto;
                 width: 100%;
-                font-size: 0.8rem;
-                padding: 6px 10px;
+                font-size: 0.7rem;
+                padding: 5px 8px;
                 text-align: left;
                 order: 1;
                 margin-right: 0;
-                margin-bottom: 5px;
+                margin-bottom: 4px;
             }
             
             .task-text {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
                 order: 2;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
             
             .save-indicator {
-                bottom: 20px;
-                right: 20px;
-                padding: 12px 20px;
-                font-size: 0.85rem;
+                bottom: 15px;
+                right: 15px;
+                padding: 10px 15px;
+                font-size: 0.8rem;
             }
             
             .notification {
-                top: 15px;
-                right: 15px;
-                left: 15px;
-                padding: 12px 15px;
-                font-size: 0.9rem;
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                padding: 10px 12px;
+                font-size: 0.85rem;
             }
         }
         
@@ -253,54 +824,822 @@
             }
             
             .header h1 {
-                font-size: 1.6rem;
-            }
-            
-            .date-nav {
-                padding: 10px 12px;
-                gap: 8px;
-            }
-            
-            .nav-btn {
-                padding: 6px 10px;
-                font-size: 0.8rem;
-            }
-            
-            .date-display {
-                font-size: 0.9rem;
-                min-width: 120px;
+                font-size: 1.4rem;
             }
             
             .stats-grid {
                 grid-template-columns: 1fr;
-                gap: 12px;
+                gap: 10px;
             }
             
             .current-time {
-                font-size: 1.8rem;
+                font-size: 1.3rem;
             }
             
             .current-task {
-                font-size: 1rem;
-                padding: 10px;
+                font-size: 0.8rem;
+                padding: 8px;
             }
             
             .weekly-chart {
-                height: 100px;
+                height: 80px;
                 gap: 2px;
             }
             
             .bar-container {
-                height: 80px;
-            }
-            
-            .bar-percentage {
-                font-size: 0.65rem;
-                top: -18px;
-            }
-            
-            .day-label {
-                font-size: 0.75rem;
-                margin-top: 6px;
+                height: 60px;
             }
         }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏃‍♂️ 용현이의 데일리 스케줄</h1>
+            <p>이제는 몸과 마음도 챙기자구🙏🙏🙏</p>
+        </div>
+
+        <div class="date-controls">
+            <div class="date-nav">
+                <button class="nav-btn" id="prevDayBtn">← 어제</button>
+                <div class="date-display" id="dateDisplay">로딩중...</div>
+                <button class="nav-btn" id="nextDayBtn">내일 →</button>
+            </div>
+        </div>
+
+        <!-- 주간 달성률 그래프 -->
+        <div class="weekly-progress-section">
+            <div class="weekly-progress-header">
+                <div class="weekly-progress-title">📊 주간 달성률</div>
+                <div class="weekly-average" id="weeklyAverage">평균 0%</div>
+            </div>
+            <div class="weekly-chart" id="weeklyChart">
+                <!-- 주간 그래프가 여기에 생성됩니다 -->
+            </div>
+        </div>
+
+        <div class="current-time-section">
+            <div class="current-time" id="currentTime">--:--</div>
+            <div class="current-task" id="currentTask">🔍 현재 할 일을 확인하고 있습니다...</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🏃‍♂️</div>
+                <div class="stat-title">오늘 운동</div>
+                <div class="stat-value"><span id="exerciseCount">0</span>/<span id="exerciseTotal">2</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="exerciseProgress"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🍽️</div>
+                <div class="stat-title">오늘 식사</div>
+                <div class="stat-value"><span id="mealCount">0</span>/<span id="mealTotal">4</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="mealProgress"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">😴</div>
+                <div class="stat-title">수면 관리</div>
+                <div class="stat-value"><span id="sleepCount">0</span>/<span id="sleepTotal">2</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="sleepProgress"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-title">전체 달성률</div>
+                <div class="stat-value"><span id="totalProgress">0</span>%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="totalProgressBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="completion-celebration" id="completionCelebration">
+            <h2>🎉 완벽한 하루였습니다! 🎉</h2>
+            <p>모든 목표를 달성했습니다. 계속해서 건강한 습관을 유지해보세요!</p>
+        </div>
+
+        <!-- 메모 섹션을 체크리스트 위로 이동 -->
+        <div class="memo-section">
+            <div class="memo-header">
+                <h3>📝 나만의 메모</h3>
+                <span class="memo-info">언제든지 자유롭게 메모하세요</span>
+            </div>
+            <textarea 
+                id="permanentMemo" 
+                placeholder="자유롭게 메모하세요. 목표, 생각, 아이디어, 할 일 등 무엇이든 적어보세요..."
+                rows="5"
+            ></textarea>
+            <div class="memo-footer">
+                <span class="memo-count"><span id="memoCharCount">0</span> / 1000자</span>
+                <button class="memo-save-btn" id="memoSaveBtn">💾 메모 저장</button>
+            </div>
+        </div>
+
+        <div class="checklist-container">
+            <div class="checklist-header">
+                <div class="checklist-title" id="checklistTitle">오늘의 건강 체크리스트</div>
+                <div class="completion-badge" id="completionBadge">0/8 완료</div>
+            </div>
+            <div class="checklist" id="checklistItems">
+                <!-- 체크리스트 항목들이 여기에 생성됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <div class="save-indicator" id="saveIndicator">💾 자동저장</div>
+    <div class="notification" id="notification"></div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAXr7parhL6wQuUzy4MPvVhV6-J53wzcA",
+            authDomain: "pastelmovie-cac7a.firebaseapp.com",
+            databaseURL: "https://pastelmovie-cac7a-default-rtdb.firebaseio.com",
+            projectId: "pastelmovie-cac7a",
+            storageBucket: "pastelmovie-cac7a.firebasestorage.app",
+            messagingSenderId: "543294016464",
+            appId: "1:543294016464:web:47162285ca02d3cfb587d5",
+            measurementId: "G-LK2Q13294B"
+        };
+
+        // Firebase 초기화
+        let firebaseApp = null;
+        let db = null;
+        let firebaseInitialized = false;
+
+        try {
+            firebaseApp = initializeApp(firebaseConfig);
+            db = getFirestore(firebaseApp);
+            firebaseInitialized = true;
+            console.log('✅ Firebase 연결 성공');
+        } catch (error) {
+            console.error('❌ Firebase 연결 실패:', error);
+        }
+
+        // 전역 변수
+        let currentDate = new Date();
+        let memoLoaded = false;
+        let weeklyChartCreated = false;
+
+        const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+        const dayNamesShort = ['일', '월', '화', '수', '목', '금', '토'];
+
+        // 스케줄 데이터 - 토요일에 식사시간 추가
+        const schedules = {
+            weekday: [
+                { time: "07:30", task: "🌅 기상 + 물 한 컵", type: "sleep" },
+                { time: "08:00-10:00", task: "🏃‍♂️ 아침 운동 (2시간)", type: "exercise" },
+                { time: "10:00-11:00", task: "🍽️ 아침식사 + 샤워", type: "meal" },
+                { time: "13:00-14:00", task: "🍽️ 점심식사", type: "meal" },
+                { time: "18:00-19:00", task: "🍽️ 저녁식사", type: "meal" },
+                { time: "19:30-21:30", task: "💪 저녁 운동 (2시간)", type: "exercise" },
+                { time: "21:30", task: "🥩 닭가슴살/단백질", type: "meal" },
+                { time: "23:30", task: "😴 취침", type: "sleep" }
+            ],
+            saturday: [
+                { time: "07:30", task: "🌅 기상", type: "sleep" },
+                { time: "10:00-12:00", task: "🏃‍♂️ 아침 운동 (2시간)", type: "exercise" },
+                { time: "12:00-13:00", task: "🍽️ 아침 겸 점심 식사", type: "meal" },
+                { time: "16:00-18:00", task: "💪 저녁 운동 (2시간)", type: "exercise" },
+                { time: "18:00-19:00", task: "🍽️ 저녁식사", type: "meal" },
+                { time: "23:30", task: "😴 취침", type: "sleep" }
+            ],
+            sunday: [
+                { time: "07:30", task: "🌅 기상", type: "sleep" },
+                { time: "10:00", task: "🍽️ 아침식사", type: "meal" },
+                { time: "13:00", task: "🍽️ 점심식사", type: "meal" },
+                { time: "18:00", task: "🍽️ 저녁식사", type: "meal" },
+                { time: "23:30", task: "😴 취침", type: "sleep" }
+            ]
+        };
+
+        // 유틸리티 함수들
+        function getScheduleForDate(date) {
+            const dayIndex = date.getDay();
+            if (dayIndex === 0) return schedules.sunday;
+            else if (dayIndex === 6) return schedules.saturday;
+            else return schedules.weekday;
+        }
+
+        function formatDate(date) {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            
+            const dateStr = date.toDateString();
+            
+            if (dateStr === today.toDateString()) {
+                return `오늘 (${date.getMonth() + 1}/${date.getDate()})`;
+            } else if (dateStr === yesterday.toDateString()) {
+                return `어제 (${date.getMonth() + 1}/${date.getDate()})`;
+            } else if (dateStr === tomorrow.toDateString()) {
+                return `내일 (${date.getMonth() + 1}/${date.getDate()})`;
+            } else {
+                return `${dayNames[date.getDay()]} (${date.getMonth() + 1}/${date.getDate()})`;
+            }
+        }
+
+        // 시간 관련 함수들
+        function parseTime(timeStr) {
+            if (!timeStr.match(/\d{1,2}:\d{2}/)) return null;
+            const [hour, minute] = timeStr.split(':').map(Number);
+            return hour + (minute / 60);
+        }
+
+        function parseTimeRange(timeStr) {
+            if (timeStr.includes('-')) {
+                const [start, end] = timeStr.split('-');
+                const startTime = parseTime(start.trim());
+                const endTime = parseTime(end.trim());
+                return startTime && endTime ? { start: startTime, end: endTime } : null;
+            } else {
+                const time = parseTime(timeStr);
+                return time ? { start: time, end: time + 0.5 } : null;
+            }
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.getHours() + (now.getMinutes() / 60);
+        }
+
+        function findCurrentAndNextTasks() {
+            const schedule = getScheduleForDate(currentDate);
+            const currentTime = getCurrentTime();
+            
+            let currentTaskIndex = -1;
+            let nextTaskIndex = -1;
+            
+            for (let i = 0; i < schedule.length; i++) {
+                const timeRange = parseTimeRange(schedule[i].time);
+                if (!timeRange) continue;
+                
+                if (currentTime >= timeRange.start && currentTime <= timeRange.end) {
+                    currentTaskIndex = i;
+                    break;
+                } else if (currentTime < timeRange.start && nextTaskIndex === -1) {
+                    nextTaskIndex = i;
+                }
+            }
+            
+            return { current: currentTaskIndex, next: nextTaskIndex };
+        }
+
+        // 주간 달성률 그래프 - 한번만 생성
+        async function createWeeklyChart() {
+            if (weeklyChartCreated) return;
+            
+            const weeklyChart = document.getElementById('weeklyChart');
+            if (!weeklyChart) return;
+            
+            weeklyChart.innerHTML = '';
+            weeklyChartCreated = true;
+
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+
+            console.log('📊 주간차트 생성 시작...');
+
+            // 7개 막대 생성
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                
+                const dayBar = document.createElement('div');
+                dayBar.className = 'day-bar';
+                
+                if (date.toDateString() === today.toDateString()) {
+                    dayBar.classList.add('today');
+                }
+
+                const barContainer = document.createElement('div');
+                barContainer.className = 'bar-container';
+
+                const barFill = document.createElement('div');
+                barFill.className = 'bar-fill';
+                barFill.style.height = '0%';
+
+                const percentage = document.createElement('div');
+                percentage.className = 'bar-percentage';
+                percentage.textContent = '-';
+
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'day-label';
+                dayLabel.textContent = dayNamesShort[i];
+
+                barContainer.appendChild(barFill);
+                barContainer.appendChild(percentage);
+                dayBar.appendChild(barContainer);
+                dayBar.appendChild(dayLabel);
+                weeklyChart.appendChild(dayBar);
+            }
+
+            console.log(`✅ 주간차트 생성 완료: ${weeklyChart.children.length}개 막대`);
+            
+            // 데이터 로딩
+            await loadWeeklyData();
+        }
+
+        // 주간 데이터 로딩
+        async function loadWeeklyData() {
+            if (!firebaseInitialized) return;
+
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+
+            const weeklyChart = document.getElementById('weeklyChart');
+            const dayBars = weeklyChart.children;
+
+            let totalPercentage = 0;
+            let validDays = 0;
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                
+                if (date > today) continue;
+
+                try {
+                    const dateStr = date.toISOString().split('T')[0];
+                    const docSnap = await getDoc(doc(db, 'healthTracker', dateStr));
+                    
+                    let dayPercentage = 0;
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        const completedTasks = data.schedule.filter(task => task.completed).length;
+                        dayPercentage = Math.round((completedTasks / data.schedule.length) * 100);
+                    }
+
+                    // 해당 막대 업데이트
+                    if (dayBars[i]) {
+                        const barFill = dayBars[i].querySelector('.bar-fill');
+                        const percentage = dayBars[i].querySelector('.bar-percentage');
+                        
+                        if (barFill && percentage) {
+                            barFill.style.height = `${dayPercentage}%`;
+                            percentage.textContent = `${dayPercentage}%`;
+                        }
+                    }
+
+                    totalPercentage += dayPercentage;
+                    validDays++;
+
+                } catch (error) {
+                    console.error(`❌ ${date.toDateString()} 데이터 로드 실패:`, error);
+                }
+            }
+
+            // 주간 평균 업데이트
+            const weeklyAverage = validDays > 0 ? Math.round(totalPercentage / validDays) : 0;
+            document.getElementById('weeklyAverage').textContent = `평균 ${weeklyAverage}%`;
+        }
+
+        // 현재 날짜 차트 업데이트
+        function updateTodayInChart() {
+            const today = new Date();
+            const currentDateStr = currentDate.toISOString().split('T')[0];
+            const todayStr = today.toISOString().split('T')[0];
+            
+            if (currentDateStr !== todayStr) return;
+
+            const schedule = getScheduleForDate(currentDate);
+            let totalCompleted = 0;
+            
+            schedule.forEach((item, index) => {
+                const checkbox = document.getElementById(`checkbox-${index}`);
+                if (checkbox && checkbox.checked) {
+                    totalCompleted++;
+                }
+            });
+            
+            const currentPercentage = Math.round((totalCompleted / schedule.length) * 100);
+            
+            // 오늘 막대 찾아서 업데이트
+            const todayBar = document.querySelector('.day-bar.today');
+            if (todayBar) {
+                const barFill = todayBar.querySelector('.bar-fill');
+                const percentage = todayBar.querySelector('.bar-percentage');
+                
+                if (barFill && percentage) {
+                    barFill.style.height = `${currentPercentage}%`;
+                    percentage.textContent = `${currentPercentage}%`;
+                }
+            }
+        }
+
+        // UI 업데이트 함수들
+        function updateCurrentTimeDisplay() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ko-KR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            
+            document.getElementById('currentTime').textContent = timeStr;
+            
+            const schedule = getScheduleForDate(currentDate);
+            const taskIndices = findCurrentAndNextTasks();
+            
+            const currentTaskEl = document.getElementById('currentTask');
+            if (taskIndices.current !== -1) {
+                const currentTask = schedule[taskIndices.current];
+                currentTaskEl.textContent = `🔥 ${currentTask.task}`;
+                currentTaskEl.style.background = '#fef3c7';
+                currentTaskEl.style.borderLeftColor = '#f59e0b';
+            } else {
+                currentTaskEl.textContent = '🌟 현재 예정된 작업이 없습니다';
+                currentTaskEl.style.background = '#f0f9ff';
+                currentTaskEl.style.borderLeftColor = '#0ea5e9';
+            }
+            
+            return taskIndices;
+        }
+
+        function generateChecklist() {
+            const schedule = getScheduleForDate(currentDate);
+            const taskIndices = updateCurrentTimeDisplay();
+            
+            // 날짜 표시 업데이트
+            const dateText = formatDate(currentDate);
+            document.getElementById('dateDisplay').textContent = dateText;
+            document.getElementById('checklistTitle').textContent = `${dateText} 건강 체크리스트`;
+            
+            // 체크리스트 HTML 생성
+            const checklistItems = document.getElementById('checklistItems');
+            checklistItems.innerHTML = '';
+            
+            schedule.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'checklist-item';
+                itemDiv.id = `item-${index}`;
+                
+                // 현재/다음 작업 하이라이트
+                if (index === taskIndices.current) {
+                    itemDiv.classList.add('current-time');
+                } else if (index === taskIndices.next) {
+                    itemDiv.classList.add('next-task');
+                }
+                
+                itemDiv.innerHTML = `
+                    <input type="checkbox" class="checkbox" id="checkbox-${index}">
+                    <div class="time-badge">${item.time}</div>
+                    <div class="task-text">${item.task}</div>
+                `;
+                
+                // 이벤트 리스너
+                const checkbox = itemDiv.querySelector('.checkbox');
+                checkbox.addEventListener('change', updateProgress);
+                
+                itemDiv.addEventListener('click', (e) => {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        updateProgress();
+                    }
+                });
+                
+                checklistItems.appendChild(itemDiv);
+            });
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            const schedule = getScheduleForDate(currentDate);
+            
+            let exerciseCount = 0;
+            let mealCount = 0;
+            let sleepCount = 0;
+            let totalCompleted = 0;
+            
+            schedule.forEach((item, index) => {
+                const checkbox = document.getElementById(`checkbox-${index}`);
+                const checklistItem = document.getElementById(`item-${index}`);
+                
+                if (checkbox && checklistItem) {
+                    if (checkbox.checked) {
+                        totalCompleted++;
+                        checklistItem.classList.add('completed');
+                        
+                        switch(item.type) {
+                            case 'exercise': exerciseCount++; break;
+                            case 'meal': mealCount++; break;
+                            case 'sleep': sleepCount++; break;
+                        }
+                    } else {
+                        checklistItem.classList.remove('completed');
+                    }
+                }
+            });
+            
+            const exerciseTotal = schedule.filter(item => item.type === 'exercise').length;
+            const mealTotal = schedule.filter(item => item.type === 'meal').length;
+            const sleepTotal = schedule.filter(item => item.type === 'sleep').length;
+            const totalProgress = Math.round((totalCompleted / schedule.length) * 100);
+            
+            // 통계 업데이트
+            document.getElementById('exerciseCount').textContent = exerciseCount;
+            document.getElementById('exerciseTotal').textContent = exerciseTotal;
+            document.getElementById('mealCount').textContent = mealCount;
+            document.getElementById('mealTotal').textContent = mealTotal;
+            document.getElementById('sleepCount').textContent = sleepCount;
+            document.getElementById('sleepTotal').textContent = sleepTotal;
+            document.getElementById('totalProgress').textContent = totalProgress;
+            document.getElementById('completionBadge').textContent = `${totalCompleted}/${schedule.length} 완료`;
+            
+            // 프로그레스 바 업데이트
+            document.getElementById('exerciseProgress').style.width = `${(exerciseCount / exerciseTotal) * 100}%`;
+            document.getElementById('mealProgress').style.width = `${(mealCount / mealTotal) * 100}%`;
+            document.getElementById('sleepProgress').style.width = `${(sleepCount / sleepTotal) * 100}%`;
+            document.getElementById('totalProgressBar').style.width = `${totalProgress}%`;
+            
+            // 완료 축하
+            const celebration = document.getElementById('completionCelebration');
+            if (totalCompleted === schedule.length && schedule.length > 0) {
+                celebration.classList.add('show');
+            } else {
+                celebration.classList.remove('show');
+            }
+        }
+
+        function updateProgress() {
+            updateStats();
+            saveChecklistData();
+            updateTodayInChart(); // 오늘 차트만 업데이트
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateSaveIndicator(status) {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.className = `save-indicator ${status}`;
+            
+            switch(status) {
+                case 'saving':
+                    indicator.textContent = '💾 저장중...';
+                    break;
+                case 'saved':
+                    indicator.textContent = '✅ 저장완료';
+                    setTimeout(() => {
+                        indicator.className = 'save-indicator';
+                        indicator.textContent = '💾 자동저장';
+                    }, 2000);
+                    break;
+                case 'error':
+                    indicator.textContent = '❌ 저장실패';
+                    setTimeout(() => {
+                        indicator.className = 'save-indicator';
+                        indicator.textContent = '💾 자동저장';
+                    }, 3000);
+                    break;
+                default:
+                    indicator.textContent = '💾 자동저장';
+            }
+        }
+
+        // Firebase 데이터 관리
+        async function saveChecklistData() {
+            if (!firebaseInitialized) return;
+
+            updateSaveIndicator('saving');
+
+            try {
+                const schedule = getScheduleForDate(currentDate);
+                const dateStr = currentDate.toISOString().split('T')[0];
+                
+                const dailyData = schedule.map((item, index) => {
+                    const checkbox = document.getElementById(`checkbox-${index}`);
+                    return {
+                        time: item.time,
+                        task: item.task,
+                        type: item.type,
+                        completed: checkbox ? checkbox.checked : false
+                    };
+                });
+
+                await setDoc(doc(db, 'healthTracker', dateStr), {
+                    date: dateStr,
+                    dayOfWeek: dayNames[currentDate.getDay()],
+                    schedule: dailyData,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                updateSaveIndicator('saved');
+                console.log('✅ 체크리스트 저장 완료:', dateStr);
+
+            } catch (error) {
+                console.error('❌ 체크리스트 저장 실패:', error);
+                updateSaveIndicator('error');
+                showNotification('저장 실패: ' + error.message, 'error');
+            }
+        }
+
+        async function loadChecklistData() {
+            if (!firebaseInitialized) return;
+
+            try {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                const docSnap = await getDoc(doc(db, 'healthTracker', dateStr));
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const schedule = data.schedule;
+
+                    schedule.forEach((item, index) => {
+                        const checkbox = document.getElementById(`checkbox-${index}`);
+                        if (checkbox) {
+                            checkbox.checked = item.completed;
+                        }
+                    });
+                    
+                    updateStats();
+                    console.log('📂 체크리스트 로드 완료:', dateStr);
+                }
+            } catch (error) {
+                console.error('❌ 체크리스트 로드 실패:', error);
+            }
+        }
+
+        // 영구 메모 관리
+        async function savePermanentMemo() {
+            if (!firebaseInitialized) return;
+
+            const memoTextarea = document.getElementById('permanentMemo');
+            if (!memoTextarea) return;
+
+            try {
+                const memoText = memoTextarea.value.trim();
+                
+                await setDoc(doc(db, 'permanentData', 'memo'), {
+                    content: memoText,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                console.log('📝 영구 메모 저장 완료');
+            } catch (error) {
+                console.error('❌ 메모 저장 실패:', error);
+                showNotification('메모 저장 실패', 'error');
+            }
+        }
+
+        async function loadPermanentMemo() {
+            if (!firebaseInitialized || memoLoaded) return;
+
+            try {
+                const docSnap = await getDoc(doc(db, 'permanentData', 'memo'));
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const memoTextarea = document.getElementById('permanentMemo');
+                    
+                    if (memoTextarea) {
+                        memoTextarea.value = data.content || '';
+                        updateMemoCount();
+                        memoLoaded = true;
+                    }
+                    
+                    console.log('📂 영구 메모 로드 완료');
+                }
+            } catch (error) {
+                console.error('❌ 메모 로드 실패:', error);
+            }
+        }
+
+        function updateMemoCount() {
+            const memoTextarea = document.getElementById('permanentMemo');
+            const memoCharCount = document.getElementById('memoCharCount');
+            
+            if (memoTextarea && memoCharCount) {
+                let length = memoTextarea.value.length;
+                
+                if (length > 1000) {
+                    memoTextarea.value = memoTextarea.value.substring(0, 1000);
+                    length = 1000;
+                }
+                
+                memoCharCount.textContent = length;
+                
+                if (length > 900) {
+                    memoCharCount.style.color = '#ef4444';
+                } else if (length > 800) {
+                    memoCharCount.style.color = '#f59e0b';
+                } else {
+                    memoCharCount.style.color = '#6b7280';
+                }
+            }
+        }
+
+        let memoSaveTimeout;
+        function setupMemoEvents() {
+            const memoTextarea = document.getElementById('permanentMemo');
+            const memoSaveBtn = document.getElementById('memoSaveBtn');
+            
+            if (memoTextarea) {
+                memoTextarea.addEventListener('input', updateMemoCount);
+                
+                memoTextarea.addEventListener('input', () => {
+                    clearTimeout(memoSaveTimeout);
+                    memoSaveTimeout = setTimeout(savePermanentMemo, 3000);
+                });
+            }
+            
+            if (memoSaveBtn) {
+                memoSaveBtn.addEventListener('click', () => {
+                    clearTimeout(memoSaveTimeout);
+                    savePermanentMemo();
+                    memoSaveBtn.textContent = '✅ 저장됨';
+                    memoSaveBtn.classList.add('saved');
+                    setTimeout(() => {
+                        memoSaveBtn.textContent = '💾 메모 저장';
+                        memoSaveBtn.classList.remove('saved');
+                    }, 2000);
+                });
+            }
+        }
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            document.getElementById('prevDayBtn').addEventListener('click', () => {
+                currentDate.setDate(currentDate.getDate() - 1);
+                generateChecklist();
+                loadChecklistData();
+            });
+            
+            document.getElementById('nextDayBtn').addEventListener('click', () => {
+                currentDate.setDate(currentDate.getDate() + 1);
+                generateChecklist();
+                loadChecklistData();
+            });
+            
+            setupMemoEvents();
+        }
+
+        // 앱 초기화
+        async function startApp() {
+            console.log('🚀 건강관리 트래커 시작!');
+            
+            setupEventListeners();
+            updateCurrentTimeDisplay();
+            generateChecklist();
+            
+            // 주간 그래프 생성 (한번만)
+            await createWeeklyChart();
+            
+            // 데이터 로드
+            loadChecklistData();
+            loadPermanentMemo();
+            
+            if (firebaseInitialized) {
+                showNotification('Firebase 연결 완료! 🔥', 'success');
+            } else {
+                showNotification('Firebase 연결 실패 - 로컬에서 작동', 'error');
+            }
+            
+            console.log('✅ 앱 초기화 완료');
+        }
+
+        // 시간 업데이트 타이머
+        setInterval(() => {
+            const taskIndices = updateCurrentTimeDisplay();
+            
+            // 하이라이트 업데이트
+            const schedule = getScheduleForDate(currentDate);
+            schedule.forEach((item, index) => {
+                const itemEl = document.getElementById(`item-${index}`);
+                if (itemEl) {
+                    itemEl.classList.remove('current-time', 'next-task');
+                    
+                    if (index === taskIndices.current) {
+                        itemEl.classList.add('current-time');
+                    } else if (index === taskIndices.next) {
+                        itemEl.classList.add('next-task');
+                    }
+                }
+            });
+        }, 60000);
+
+        // 앱 시작
+        document.addEventListener('DOMContentLoaded', startApp);
+    </script>
+</body>
+</html>
