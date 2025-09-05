@@ -1502,4 +1502,331 @@
                 { time: "08:00-10:00", task: "🏃‍♂️ 아침 운동 (2시간)", type: "exercise" },
                 { time: "10:00-11:00", task: "🍽️ 아침식사 + 샤워", type: "meal" },
                 { time: "13:00-14:00", task: "🍽️ 점심식사", type: "meal" },
-                { time: "18:00-19:00", task: "🍽️ 저녁식사", type: "meal
+                { time: "18:00-19:00", task: "🍽️ 저녁식사", type: "meal" },
+                { time: "19:30-21:30", task: "💪 저녁 운동 (2시간)", type: "exercise" },
+                { time: "21:30", task: "🥩 닭가슴살/단백질", type: "meal" },
+                { time: "23:30", task: "😴 취침", type: "sleep" }
+            ],
+            saturday: [
+                { time: "07:30", task: "🌅 기상", type: "sleep" },
+                { time: "10:00-12:00", task: "🏃‍♂️ 아침 운동 (2시간)", type: "exercise" },
+                { time: "12:00-13:00", task: "🍽️ 아침 겸 점심 식사", type: "meal" },
+                { time: "16:00-18:00", task: "💪 저녁 운동 (2시간)", type: "exercise" },
+                { time: "18:00-19:00", task: "🍽️ 저녁식사", type: "meal" },
+                { time: "23:30", task: "😴 취침", type: "sleep" }
+            ],
+            sunday: [
+                { time: "07:30", task: "🌅 기상", type: "sleep" },
+                { time: "10:00", task: "🍽️ 아침식사", type: "meal" },
+                { time: "13:00", task: "🍽️ 점심식사", type: "meal" },
+                { time: "18:00", task: "🍽️ 저녁식사", type: "meal" },
+                { time: "23:30", task: "😴 취침", type: "sleep" }
+            ]
+        };
+
+        // 유틸리티 함수들
+        function getScheduleForDate(date) {
+            const dayIndex = date.getDay();
+            if (dayIndex === 0) return schedules.sunday;
+            else if (dayIndex === 6) return schedules.saturday;
+            else return schedules.weekday;
+        }
+
+        function formatDate(date) {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            
+            const dateStr = date.toDateString();
+            
+            if (dateStr === today.toDateString()) {
+                return `오늘 (${date.getMonth() + 1}/${date.getDate()})`;
+            } else if (dateStr === yesterday.toDateString()) {
+                return `어제 (${date.getMonth() + 1}/${date.getDate()})`;
+            } else if (dateStr === tomorrow.toDateString()) {
+                return `내일 (${date.getMonth() + 1}/${date.getDate()})`;
+            } else {
+                return `${dayNames[date.getDay()]} (${date.getMonth() + 1}/${date.getDate()})`;
+            }
+        }
+
+        // 시간 관련 함수들
+        function parseTime(timeStr) {
+            if (!timeStr.match(/\d{1,2}:\d{2}/)) return null;
+            const [hour, minute] = timeStr.split(':').map(Number);
+            return hour + (minute / 60);
+        }
+
+        function parseTimeRange(timeStr) {
+            if (timeStr.includes('-')) {
+                const [start, end] = timeStr.split('-');
+                const startTime = parseTime(start.trim());
+                const endTime = parseTime(end.trim());
+                return startTime && endTime ? { start: startTime, end: endTime } : null;
+            } else {
+                const time = parseTime(timeStr);
+                return time ? { start: time, end: time + 0.5 } : null;
+            }
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.getHours() + (now.getMinutes() / 60);
+        }
+
+        function findCurrentAndNextTasks() {
+            const schedule = getScheduleForDate(currentDate);
+            const currentTime = getCurrentTime();
+            
+            let currentTaskIndex = -1;
+            let nextTaskIndex = -1;
+            
+            for (let i = 0; i < schedule.length; i++) {
+                const timeRange = parseTimeRange(schedule[i].time);
+                if (!timeRange) continue;
+                
+                if (currentTime >= timeRange.start && currentTime <= timeRange.end) {
+                    currentTaskIndex = i;
+                    break;
+                } else if (currentTime < timeRange.start && nextTaskIndex === -1) {
+                    nextTaskIndex = i;
+                }
+            }
+            
+            return { current: currentTaskIndex, next: nextTaskIndex };
+        }
+
+        // 체중 관리 함수들
+        async function saveWeightData(weight) {
+            if (!firebaseInitialized) return false;
+
+            try {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                
+                await setDoc(doc(db, 'weightTracker', dateStr), {
+                    date: dateStr,
+                    weight: parseFloat(weight),
+                    timestamp: new Date().toISOString()
+                });
+
+                console.log('✅ 체중 데이터 저장 완료:', weight + 'kg');
+                return true;
+            } catch (error) {
+                console.error('❌ 체중 데이터 저장 실패:', error);
+                return false;
+            }
+        }
+
+        async function loadWeightData() {
+            if (!firebaseInitialized) return null;
+
+            try {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                const docSnap = await getDoc(doc(db, 'weightTracker', dateStr));
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    return data.weight;
+                }
+                return null;
+            } catch (error) {
+                console.error('❌ 체중 데이터 로드 실패:', error);
+                return null;
+            }
+        }
+
+        async function loadWeeklyWeightData() {
+            if (!firebaseInitialized) return [];
+
+            const weightData = [];
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                
+                try {
+                    const dateStr = date.toISOString().split('T')[0];
+                    const docSnap = await getDoc(doc(db, 'weightTracker', dateStr));
+                    
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        weightData.push({
+                            date: dateStr,
+                            weight: data.weight,
+                            day: dayNamesShort[date.getDay()]
+                        });
+                    } else {
+                        weightData.push({
+                            date: dateStr,
+                            weight: null,
+                            day: dayNamesShort[date.getDay()]
+                        });
+                    }
+                } catch (error) {
+                    console.error(`❌ ${dateStr} 체중 데이터 로드 실패:`, error);
+                    weightData.push({
+                        date: dateStr,
+                        weight: null,
+                        day: dayNamesShort[date.getDay()]
+                    });
+                }
+            }
+            
+            return weightData;
+        }
+
+        function createWeightChart(weightData) {
+            const chartContainer = document.getElementById('weightChart');
+            chartContainer.innerHTML = '';
+
+            if (!weightData || weightData.length === 0) {
+                chartContainer.innerHTML = '<p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 50px;">아직 체중 데이터가 없습니다</p>';
+                return;
+            }
+
+            // 실제 체중 데이터가 있는 항목들만 필터링
+            const validData = weightData.filter(d => d.weight !== null);
+            
+            if (validData.length === 0) {
+                chartContainer.innerHTML = '<p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 50px;">아직 체중 데이터가 없습니다</p>';
+                return;
+            }
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'weight-chart-svg');
+            svg.setAttribute('viewBox', '0 0 320 140');
+
+            const weights = validData.map(d => d.weight);
+            const minWeight = Math.min(...weights);
+            const maxWeight = Math.max(...weights);
+            
+            // 여유 공간을 위해 범위를 확장 (최소 2kg 범위 보장)
+            const padding = Math.max((maxWeight - minWeight) * 0.1, 1);
+            const chartMinWeight = minWeight - padding;
+            const chartMaxWeight = maxWeight + padding;
+            const weightRange = chartMaxWeight - chartMinWeight;
+
+            // 차트 영역 정의 (여유 공간 확보)
+            const chartArea = {
+                left: 40,
+                right: 280,
+                top: 25,
+                bottom: 100
+            };
+            const chartHeight = chartArea.bottom - chartArea.top;
+
+            // Y축 눈금선과 라벨
+            const gridSteps = 4;
+            for (let i = 0; i <= gridSteps; i++) {
+                const y = chartArea.top + (i * (chartHeight / gridSteps));
+                const weightValue = chartMaxWeight - (i * (weightRange / gridSteps));
+                
+                // 그리드 라인
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('class', 'weight-grid-line');
+                line.setAttribute('x1', chartArea.left);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', chartArea.right);
+                line.setAttribute('y2', y);
+                svg.appendChild(line);
+                
+                // Y축 라벨
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('class', 'weight-y-axis-label');
+                label.setAttribute('x', chartArea.left - 5);
+                label.setAttribute('y', y + 3);
+                label.setAttribute('text-anchor', 'end');
+                label.textContent = weightValue.toFixed(1);
+                svg.appendChild(label);
+            }
+
+            // 체중 라인과 포인트
+            if (validData.length > 1) {
+                let pathData = '';
+                
+                validData.forEach((item, index) => {
+                    const x = chartArea.left + (index * ((chartArea.right - chartArea.left) / (validData.length - 1)));
+                    const y = chartArea.top + ((chartMaxWeight - item.weight) / weightRange) * chartHeight;
+                    
+                    if (index === 0) {
+                        pathData += `M ${x} ${y}`;
+                    } else {
+                        pathData += ` L ${x} ${y}`;
+                    }
+                });
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('class', 'weight-line');
+                path.setAttribute('d', pathData);
+                svg.appendChild(path);
+            }
+
+            // 데이터 포인트와 라벨
+            validData.forEach((item, index) => {
+                const x = chartArea.left + (index * ((chartArea.right - chartArea.left) / Math.max(validData.length - 1, 1)));
+                const y = chartArea.top + ((chartMaxWeight - item.weight) / weightRange) * chartHeight;
+
+                // 포인트 원
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('class', 'weight-point');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                svg.appendChild(circle);
+
+                // 체중 값 라벨 (포인트 위쪽)
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('class', 'weight-value-label');
+                text.setAttribute('x', x);
+                text.setAttribute('y', y - 12);
+                text.textContent = item.weight.toFixed(1);
+                svg.appendChild(text);
+
+                // 날짜 라벨 (하단)
+                const dayText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                dayText.setAttribute('class', 'weight-axis-label');
+                dayText.setAttribute('x', x);
+                dayText.setAttribute('y', chartArea.bottom + 20);
+                dayText.textContent = item.day;
+                svg.appendChild(dayText);
+            });
+
+            chartContainer.appendChild(svg);
+        }
+
+        function updateWeightStats(weightData) {
+            const validData = weightData.filter(d => d.weight !== null);
+            
+            if (validData.length < 2) {
+                document.getElementById('weightChange').textContent = '변화: -';
+                document.getElementById('weightTrend').textContent = '추세: -';
+                return;
+            }
+
+            const latestWeight = validData[validData.length - 1].weight;
+            const previousWeight = validData[validData.length - 2].weight;
+            const weightChange = latestWeight - previousWeight;
+
+            const changeEl = document.getElementById('weightChange');
+            if (weightChange > 0) {
+                changeEl.textContent = `+${weightChange.toFixed(1)}kg`;
+                changeEl.className = 'weight-change positive';
+            } else if (weightChange < 0) {
+                changeEl.textContent = `${weightChange.toFixed(1)}kg`;
+                changeEl.className = 'weight-change negative';
+            } else {
+                changeEl.textContent = '변화없음';
+                changeEl.className = 'weight-change';
+            }
+
+            // 전체 추세 계산 (첫 번째와 마지막 체중 비교)
+            const firstWeight = validData[0].weight;
+            const totalChange = latestWeight - firstWeight;
+            const trendEl = document.getElementById('weightTrend');
+            
+            if (totalChange > 0) {
+                trendEl.textContent = '증가 추세';
+            } else if (totalChange < 0) {
+                trendEl.textContent = '감소 추세
