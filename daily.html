@@ -1876,6 +1876,7 @@
                 
                 const dayBar = document.createElement('div');
                 dayBar.className = 'day-bar';
+                dayBar.setAttribute('data-day-index', i);
                 
                 if (date.toDateString() === today.toDateString()) {
                     dayBar.classList.add('today');
@@ -1890,7 +1891,7 @@
 
                 const percentage = document.createElement('div');
                 percentage.className = 'bar-percentage';
-                percentage.textContent = '-';
+                percentage.textContent = '0%';
 
                 const dayLabel = document.createElement('div');
                 dayLabel.className = 'day-label';
@@ -1909,35 +1910,48 @@
             await loadWeeklyData();
         }
 
-        // 주간 데이터 로딩
+        // 주간 데이터 로딩 - 개선된 버전
         async function loadWeeklyData() {
-            if (!firebaseInitialized) return;
+            if (!firebaseInitialized) {
+                console.log('Firebase가 초기화되지 않음');
+                return;
+            }
 
             const today = new Date();
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - today.getDay());
 
             const weeklyChart = document.getElementById('weeklyChart');
-            const dayBars = weeklyChart.children;
+            if (!weeklyChart) {
+                console.error('주간 차트 요소를 찾을 수 없음');
+                return;
+            }
 
+            const dayBars = weeklyChart.children;
             let totalPercentage = 0;
             let validDays = 0;
+
+            console.log('📊 주간 데이터 로딩 시작...');
 
             for (let i = 0; i < 7; i++) {
                 const date = new Date(startOfWeek);
                 date.setDate(startOfWeek.getDate() + i);
                 
-                if (date > today) continue;
+                const dateStr = date.toISOString().split('T')[0];
+                let dayPercentage = 0;
 
                 try {
-                    const dateStr = date.toISOString().split('T')[0];
                     const docSnap = await getDoc(doc(db, 'healthTracker', dateStr));
                     
-                    let dayPercentage = 0;
                     if (docSnap.exists()) {
                         const data = docSnap.data();
-                        const completedTasks = data.schedule.filter(task => task.completed).length;
-                        dayPercentage = Math.round((completedTasks / data.schedule.length) * 100);
+                        if (data.schedule && Array.isArray(data.schedule)) {
+                            const completedTasks = data.schedule.filter(task => task.completed).length;
+                            dayPercentage = Math.round((completedTasks / data.schedule.length) * 100);
+                            console.log(`${dateStr}: ${completedTasks}/${data.schedule.length} = ${dayPercentage}%`);
+                        }
+                    } else {
+                        console.log(`${dateStr}: 데이터 없음`);
                     }
 
                     // 해당 막대 업데이트
@@ -1951,25 +1965,41 @@
                         }
                     }
 
-                    totalPercentage += dayPercentage;
-                    validDays++;
+                    if (date <= today) {
+                        totalPercentage += dayPercentage;
+                        validDays++;
+                    }
 
                 } catch (error) {
-                    console.error(`❌ ${date.toDateString()} 데이터 로드 실패:`, error);
+                    console.error(`❌ ${dateStr} 데이터 로드 실패:`, error);
+                    
+                    // 오류 시에도 0%로 표시
+                    if (dayBars[i]) {
+                        const barFill = dayBars[i].querySelector('.bar-fill');
+                        const percentage = dayBars[i].querySelector('.bar-percentage');
+                        
+                        if (barFill && percentage) {
+                            barFill.style.height = '0%';
+                            percentage.textContent = '0%';
+                        }
+                    }
                 }
             }
 
             // 주간 평균 업데이트
             const weeklyAverage = validDays > 0 ? Math.round(totalPercentage / validDays) : 0;
             document.getElementById('weeklyAverage').textContent = `평균 ${weeklyAverage}%`;
+            
+            console.log(`✅ 주간 평균: ${weeklyAverage}% (${validDays}일 기준)`);
         }
 
-        // 현재 날짜 차트 업데이트
+        // 현재 날짜 차트 업데이트 - 개선된 버전
         function updateTodayInChart() {
             const today = new Date();
             const currentDateStr = currentDate.toISOString().split('T')[0];
             const todayStr = today.toISOString().split('T')[0];
             
+            // 현재 선택된 날짜가 오늘이 아니면 업데이트하지 않음
             if (currentDateStr !== todayStr) return;
 
             const schedule = getScheduleForDate(currentDate);
@@ -1995,6 +2025,8 @@
                     percentage.textContent = `${currentPercentage}%`;
                 }
             }
+            
+            console.log(`📊 오늘 진행률 업데이트: ${currentPercentage}%`);
         }
 
         // UI 업데이트 함수들
