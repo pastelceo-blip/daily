@@ -266,13 +266,12 @@
         }
 
         .weight-chart {
-            height: 160px;
+            height: 120px;
             position: relative;
-            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
-            border-radius: 12px;
-            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
             overflow: hidden;
-            border: 1px solid #e2e8f0;
         }
 
         .weight-chart-svg {
@@ -283,54 +282,42 @@
         .weight-line {
             fill: none;
             stroke: var(--primary);
-            stroke-width: 3;
+            stroke-width: 2.5;
             stroke-linecap: round;
             stroke-linejoin: round;
-            filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.3));
         }
 
         .weight-point {
             fill: var(--primary);
             stroke: white;
-            stroke-width: 3;
-            r: 5;
+            stroke-width: 2;
+            r: 4;
             cursor: pointer;
             transition: all 0.2s;
-            filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.4));
         }
 
         .weight-point:hover {
-            r: 7;
+            r: 6;
             fill: var(--primary-dark);
-            stroke-width: 4;
         }
 
         .weight-grid-line {
-            stroke: #cbd5e1;
-            stroke-width: 1;
-            stroke-dasharray: 3,3;
-            opacity: 0.6;
+            stroke: #e5e7eb;
+            stroke-width: 0.5;
+            stroke-dasharray: 2,2;
         }
 
         .weight-axis-label {
-            font-size: 11px;
-            fill: var(--text-secondary);
-            text-anchor: middle;
-            font-weight: 600;
-        }
-
-        .weight-y-axis-label {
             font-size: 10px;
             fill: var(--text-secondary);
-            font-weight: 600;
+            text-anchor: middle;
         }
 
         .weight-value-label {
-            font-size: 10px;
-            fill: var(--primary);
+            font-size: 9px;
+            fill: var(--text-primary);
             text-anchor: middle;
-            font-weight: 700;
-            filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.8));
+            font-weight: 600;
         }
         
         .current-time-section {
@@ -892,13 +879,13 @@
                 padding-bottom: 6px;
             }
 
-            .weight-chart {
-                height: 140px;
-                padding: 15px;
-            }
-
             .weight-chart-title {
                 font-size: 0.95rem;
+            }
+
+            .weight-chart {
+                height: 100px;
+                padding: 10px;
             }
 
             .weight-stats {
@@ -1221,8 +1208,8 @@
             }
 
             .weight-chart {
-                height: 120px;
-                padding: 12px;
+                height: 80px;
+                padding: 8px;
             }
 
             #weightInput {
@@ -1683,7 +1670,7 @@
             chartContainer.innerHTML = '';
 
             if (!weightData || weightData.length === 0) {
-                chartContainer.innerHTML = '<p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 50px;">아직 체중 데이터가 없습니다</p>';
+                chartContainer.innerHTML = '<p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 40px;">아직 체중 데이터가 없습니다</p>';
                 return;
             }
 
@@ -1691,56 +1678,29 @@
             const validData = weightData.filter(d => d.weight !== null);
             
             if (validData.length === 0) {
-                chartContainer.innerHTML = '<p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 50px;">아직 체중 데이터가 없습니다</p>';
+                chartContainer.innerHTML = '<p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin-top: 40px;">아직 체중 데이터가 없습니다</p>';
                 return;
             }
 
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.setAttribute('class', 'weight-chart-svg');
-            svg.setAttribute('viewBox', '0 0 320 140');
+            svg.setAttribute('viewBox', '0 0 300 90');
 
             const weights = validData.map(d => d.weight);
             const minWeight = Math.min(...weights);
             const maxWeight = Math.max(...weights);
-            
-            // 여유 공간을 위해 범위를 확장 (최소 2kg 범위 보장)
-            const padding = Math.max((maxWeight - minWeight) * 0.1, 1);
-            const chartMinWeight = minWeight - padding;
-            const chartMaxWeight = maxWeight + padding;
-            const weightRange = chartMaxWeight - chartMinWeight;
+            const weightRange = maxWeight - minWeight || 1;
 
-            // 차트 영역 정의 (여유 공간 확보)
-            const chartArea = {
-                left: 40,
-                right: 280,
-                top: 25,
-                bottom: 100
-            };
-            const chartHeight = chartArea.bottom - chartArea.top;
-
-            // Y축 눈금선과 라벨
-            const gridSteps = 4;
-            for (let i = 0; i <= gridSteps; i++) {
-                const y = chartArea.top + (i * (chartHeight / gridSteps));
-                const weightValue = chartMaxWeight - (i * (weightRange / gridSteps));
-                
-                // 그리드 라인
+            // 그리드 라인
+            for (let i = 0; i <= 4; i++) {
+                const y = 10 + (i * 20);
                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 line.setAttribute('class', 'weight-grid-line');
-                line.setAttribute('x1', chartArea.left);
+                line.setAttribute('x1', '30');
                 line.setAttribute('y1', y);
-                line.setAttribute('x2', chartArea.right);
+                line.setAttribute('x2', '270');
                 line.setAttribute('y2', y);
                 svg.appendChild(line);
-                
-                // Y축 라벨
-                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                label.setAttribute('class', 'weight-y-axis-label');
-                label.setAttribute('x', chartArea.left - 5);
-                label.setAttribute('y', y + 3);
-                label.setAttribute('text-anchor', 'end');
-                label.textContent = weightValue.toFixed(1);
-                svg.appendChild(label);
             }
 
             // 체중 라인과 포인트
@@ -1748,8 +1708,8 @@
                 let pathData = '';
                 
                 validData.forEach((item, index) => {
-                    const x = chartArea.left + (index * ((chartArea.right - chartArea.left) / (validData.length - 1)));
-                    const y = chartArea.top + ((chartMaxWeight - item.weight) / weightRange) * chartHeight;
+                    const x = 30 + (index * (240 / (validData.length - 1)));
+                    const y = 70 - ((item.weight - minWeight) / weightRange) * 60;
                     
                     if (index === 0) {
                         pathData += `M ${x} ${y}`;
@@ -1764,31 +1724,30 @@
                 svg.appendChild(path);
             }
 
-            // 데이터 포인트와 라벨
+            // 데이터 포인트
             validData.forEach((item, index) => {
-                const x = chartArea.left + (index * ((chartArea.right - chartArea.left) / Math.max(validData.length - 1, 1)));
-                const y = chartArea.top + ((chartMaxWeight - item.weight) / weightRange) * chartHeight;
+                const x = 30 + (index * (240 / Math.max(validData.length - 1, 1)));
+                const y = 70 - ((item.weight - minWeight) / weightRange) * 60;
 
-                // 포인트 원
                 const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 circle.setAttribute('class', 'weight-point');
                 circle.setAttribute('cx', x);
                 circle.setAttribute('cy', y);
                 svg.appendChild(circle);
 
-                // 체중 값 라벨 (포인트 위쪽)
+                // 체중 값 라벨
                 const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 text.setAttribute('class', 'weight-value-label');
                 text.setAttribute('x', x);
-                text.setAttribute('y', y - 12);
+                text.setAttribute('y', y - 8);
                 text.textContent = item.weight.toFixed(1);
                 svg.appendChild(text);
 
-                // 날짜 라벨 (하단)
+                // 날짜 라벨
                 const dayText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 dayText.setAttribute('class', 'weight-axis-label');
                 dayText.setAttribute('x', x);
-                dayText.setAttribute('y', chartArea.bottom + 20);
+                dayText.setAttribute('y', 85);
                 dayText.textContent = item.day;
                 svg.appendChild(dayText);
             });
@@ -1829,4 +1788,652 @@
             if (totalChange > 0) {
                 trendEl.textContent = '증가 추세';
             } else if (totalChange < 0) {
-                trendEl.textContent = '감소 추세
+                trendEl.textContent = '감소 추세';
+            } else {
+                trendEl.textContent = '유지 중';
+            }
+        }
+
+        async function updateWeightDisplay() {
+            const currentWeight = await loadWeightData();
+            const weightCurrentEl = document.getElementById('weightCurrent');
+            
+            if (currentWeight !== null) {
+                weightCurrentEl.textContent = `오늘 체중: ${currentWeight}kg`;
+                document.getElementById('weightInput').value = currentWeight;
+            } else {
+                weightCurrentEl.textContent = '오늘 체중: 미기록';
+                document.getElementById('weightInput').value = '';
+            }
+
+            // 주간 체중 데이터 로드 및 차트 업데이트
+            const weeklyData = await loadWeeklyWeightData();
+            createWeightChart(weeklyData);
+            updateWeightStats(weeklyData);
+        }
+
+        function setupWeightEvents() {
+            const weightInput = document.getElementById('weightInput');
+            const weightSaveBtn = document.getElementById('weightSaveBtn');
+
+            if (weightSaveBtn) {
+                weightSaveBtn.addEventListener('click', async () => {
+                    const weight = weightInput.value.trim();
+                    
+                    if (!weight || isNaN(weight) || weight < 30 || weight > 200) {
+                        showNotification('올바른 체중을 입력해주세요 (30-200kg)', 'error');
+                        return;
+                    }
+
+                    const success = await saveWeightData(weight);
+                    if (success) {
+                        weightSaveBtn.textContent = '✅ 저장됨';
+                        weightSaveBtn.classList.add('saved');
+                        showNotification('체중이 기록되었습니다!', 'success');
+                        
+                        // 화면 업데이트
+                        await updateWeightDisplay();
+                        
+                        setTimeout(() => {
+                            weightSaveBtn.textContent = '💾 기록';
+                            weightSaveBtn.classList.remove('saved');
+                        }, 2000);
+                    } else {
+                        showNotification('체중 기록에 실패했습니다', 'error');
+                    }
+                });
+            }
+
+            if (weightInput) {
+                weightInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        weightSaveBtn.click();
+                    }
+                });
+            }
+        }
+
+        // 주간 달성률 그래프 - 한번만 생성
+        async function createWeeklyChart() {
+            if (weeklyChartCreated) return;
+            
+            const weeklyChart = document.getElementById('weeklyChart');
+            if (!weeklyChart) return;
+            
+            weeklyChart.innerHTML = '';
+            weeklyChartCreated = true;
+
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+
+            console.log('📊 주간차트 생성 시작...');
+
+            // 7개 막대 생성
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                
+                const dayBar = document.createElement('div');
+                dayBar.className = 'day-bar';
+                dayBar.setAttribute('data-day-index', i);
+                
+                if (date.toDateString() === today.toDateString()) {
+                    dayBar.classList.add('today');
+                }
+
+                const barContainer = document.createElement('div');
+                barContainer.className = 'bar-container';
+
+                const barFill = document.createElement('div');
+                barFill.className = 'bar-fill';
+                barFill.style.height = '0%';
+
+                const percentage = document.createElement('div');
+                percentage.className = 'bar-percentage';
+                percentage.textContent = '0%';
+
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'day-label';
+                dayLabel.textContent = dayNamesShort[i];
+
+                barContainer.appendChild(barFill);
+                barContainer.appendChild(percentage);
+                dayBar.appendChild(barContainer);
+                dayBar.appendChild(dayLabel);
+                weeklyChart.appendChild(dayBar);
+            }
+
+            console.log(`✅ 주간차트 생성 완료: ${weeklyChart.children.length}개 막대`);
+            
+            // 데이터 로딩
+            await loadWeeklyData();
+        }
+
+        // 주간 데이터 로딩 - 개선된 버전
+        async function loadWeeklyData() {
+            if (!firebaseInitialized) {
+                console.log('Firebase가 초기화되지 않음');
+                return;
+            }
+
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+
+            const weeklyChart = document.getElementById('weeklyChart');
+            if (!weeklyChart) {
+                console.error('주간 차트 요소를 찾을 수 없음');
+                return;
+            }
+
+            const dayBars = weeklyChart.children;
+            let totalPercentage = 0;
+            let validDays = 0;
+
+            console.log('📊 주간 데이터 로딩 시작...');
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                
+                const dateStr = date.toISOString().split('T')[0];
+                let dayPercentage = 0;
+
+                try {
+                    const docSnap = await getDoc(doc(db, 'healthTracker', dateStr));
+                    
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.schedule && Array.isArray(data.schedule)) {
+                            const completedTasks = data.schedule.filter(task => task.completed).length;
+                            dayPercentage = Math.round((completedTasks / data.schedule.length) * 100);
+                            console.log(`${dateStr}: ${completedTasks}/${data.schedule.length} = ${dayPercentage}%`);
+                        }
+                    } else {
+                        console.log(`${dateStr}: 데이터 없음`);
+                    }
+
+                    // 해당 막대 업데이트
+                    if (dayBars[i]) {
+                        const barFill = dayBars[i].querySelector('.bar-fill');
+                        const percentage = dayBars[i].querySelector('.bar-percentage');
+                        
+                        if (barFill && percentage) {
+                            barFill.style.height = `${dayPercentage}%`;
+                            percentage.textContent = `${dayPercentage}%`;
+                        }
+                    }
+
+                    if (date <= today) {
+                        totalPercentage += dayPercentage;
+                        validDays++;
+                    }
+
+                } catch (error) {
+                    console.error(`❌ ${dateStr} 데이터 로드 실패:`, error);
+                    
+                    // 오류 시에도 0%로 표시
+                    if (dayBars[i]) {
+                        const barFill = dayBars[i].querySelector('.bar-fill');
+                        const percentage = dayBars[i].querySelector('.bar-percentage');
+                        
+                        if (barFill && percentage) {
+                            barFill.style.height = '0%';
+                            percentage.textContent = '0%';
+                        }
+                    }
+                }
+            }
+
+            // 주간 평균 업데이트
+            const weeklyAverage = validDays > 0 ? Math.round(totalPercentage / validDays) : 0;
+            document.getElementById('weeklyAverage').textContent = `평균 ${weeklyAverage}%`;
+            
+            console.log(`✅ 주간 평균: ${weeklyAverage}% (${validDays}일 기준)`);
+        }
+
+        // 현재 날짜 차트 업데이트 - 개선된 버전
+        function updateTodayInChart() {
+            const today = new Date();
+            const currentDateStr = currentDate.toISOString().split('T')[0];
+            const todayStr = today.toISOString().split('T')[0];
+            
+            // 현재 선택된 날짜가 오늘이 아니면 업데이트하지 않음
+            if (currentDateStr !== todayStr) return;
+
+            const schedule = getScheduleForDate(currentDate);
+            let totalCompleted = 0;
+            
+            schedule.forEach((item, index) => {
+                const checkbox = document.getElementById(`checkbox-${index}`);
+                if (checkbox && checkbox.checked) {
+                    totalCompleted++;
+                }
+            });
+            
+            const currentPercentage = Math.round((totalCompleted / schedule.length) * 100);
+            
+            // 오늘 막대 찾아서 업데이트
+            const todayBar = document.querySelector('.day-bar.today');
+            if (todayBar) {
+                const barFill = todayBar.querySelector('.bar-fill');
+                const percentage = todayBar.querySelector('.bar-percentage');
+                
+                if (barFill && percentage) {
+                    barFill.style.height = `${currentPercentage}%`;
+                    percentage.textContent = `${currentPercentage}%`;
+                }
+            }
+            
+            console.log(`📊 오늘 진행률 업데이트: ${currentPercentage}%`);
+        }
+
+        // UI 업데이트 함수들
+        function updateCurrentTimeDisplay() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ko-KR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            
+            document.getElementById('currentTime').textContent = timeStr;
+            
+            const schedule = getScheduleForDate(currentDate);
+            const taskIndices = findCurrentAndNextTasks();
+            
+            const currentTaskEl = document.getElementById('currentTask');
+            if (taskIndices.current !== -1) {
+                const currentTask = schedule[taskIndices.current];
+                currentTaskEl.textContent = `🔥 ${currentTask.task}`;
+                currentTaskEl.style.background = '#fef3c7';
+                currentTaskEl.style.borderLeftColor = '#f59e0b';
+            } else {
+                currentTaskEl.textContent = '🌟 현재 예정된 작업이 없습니다';
+                currentTaskEl.style.background = '#f0f9ff';
+                currentTaskEl.style.borderLeftColor = '#0ea5e9';
+            }
+            
+            return taskIndices;
+        }
+
+        function generateChecklist() {
+            const schedule = getScheduleForDate(currentDate);
+            const taskIndices = updateCurrentTimeDisplay();
+            
+            // 날짜 표시 업데이트
+            const dateText = formatDate(currentDate);
+            document.getElementById('dateDisplay').textContent = dateText;
+            document.getElementById('checklistTitle').textContent = `${dateText} 건강 체크리스트`;
+            
+            // 체크리스트 HTML 생성
+            const checklistItems = document.getElementById('checklistItems');
+            checklistItems.innerHTML = '';
+            
+            schedule.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'checklist-item';
+                itemDiv.id = `item-${index}`;
+                
+                // 현재/다음 작업 하이라이트
+                if (index === taskIndices.current) {
+                    itemDiv.classList.add('current-time');
+                } else if (index === taskIndices.next) {
+                    itemDiv.classList.add('next-task');
+                }
+                
+                itemDiv.innerHTML = `
+                    <input type="checkbox" class="checkbox" id="checkbox-${index}">
+                    <div class="time-badge">${item.time}</div>
+                    <div class="task-text">${item.task}</div>
+                `;
+                
+                // 이벤트 리스너
+                const checkbox = itemDiv.querySelector('.checkbox');
+                checkbox.addEventListener('change', updateProgress);
+                
+                itemDiv.addEventListener('click', (e) => {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        updateProgress();
+                    }
+                });
+                
+                checklistItems.appendChild(itemDiv);
+            });
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            const schedule = getScheduleForDate(currentDate);
+            
+            let exerciseCount = 0;
+            let mealCount = 0;
+            let sleepCount = 0;
+            let totalCompleted = 0;
+            
+            schedule.forEach((item, index) => {
+                const checkbox = document.getElementById(`checkbox-${index}`);
+                const checklistItem = document.getElementById(`item-${index}`);
+                
+                if (checkbox && checklistItem) {
+                    if (checkbox.checked) {
+                        totalCompleted++;
+                        checklistItem.classList.add('completed');
+                        
+                        switch(item.type) {
+                            case 'exercise': exerciseCount++; break;
+                            case 'meal': mealCount++; break;
+                            case 'sleep': sleepCount++; break;
+                        }
+                    } else {
+                        checklistItem.classList.remove('completed');
+                    }
+                }
+            });
+            
+            const exerciseTotal = schedule.filter(item => item.type === 'exercise').length;
+            const mealTotal = schedule.filter(item => item.type === 'meal').length;
+            const sleepTotal = schedule.filter(item => item.type === 'sleep').length;
+            const totalProgress = Math.round((totalCompleted / schedule.length) * 100);
+            
+            // 통계 업데이트
+            document.getElementById('exerciseCount').textContent = exerciseCount;
+            document.getElementById('exerciseTotal').textContent = exerciseTotal;
+            document.getElementById('mealCount').textContent = mealCount;
+            document.getElementById('mealTotal').textContent = mealTotal;
+            document.getElementById('sleepCount').textContent = sleepCount;
+            document.getElementById('sleepTotal').textContent = sleepTotal;
+            document.getElementById('totalProgress').textContent = totalProgress;
+            document.getElementById('completionBadge').textContent = `${totalCompleted}/${schedule.length} 완료`;
+            
+            // 프로그레스 바 업데이트
+            document.getElementById('exerciseProgress').style.width = `${(exerciseCount / exerciseTotal) * 100}%`;
+            document.getElementById('mealProgress').style.width = `${(mealCount / mealTotal) * 100}%`;
+            document.getElementById('sleepProgress').style.width = `${(sleepCount / sleepTotal) * 100}%`;
+            document.getElementById('totalProgressBar').style.width = `${totalProgress}%`;
+            
+            // 완료 축하
+            const celebration = document.getElementById('completionCelebration');
+            if (totalCompleted === schedule.length && schedule.length > 0) {
+                celebration.classList.add('show');
+            } else {
+                celebration.classList.remove('show');
+            }
+        }
+
+        function updateProgress() {
+            updateStats();
+            saveChecklistData();
+            updateTodayInChart();
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateSaveIndicator(status) {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.className = `save-indicator ${status}`;
+            
+            switch(status) {
+                case 'saving':
+                    indicator.textContent = '💾 저장중...';
+                    break;
+                case 'saved':
+                    indicator.textContent = '✅ 저장완료';
+                    setTimeout(() => {
+                        indicator.className = 'save-indicator';
+                        indicator.textContent = '💾 자동저장';
+                    }, 2000);
+                    break;
+                case 'error':
+                    indicator.textContent = '❌ 저장실패';
+                    setTimeout(() => {
+                        indicator.className = 'save-indicator';
+                        indicator.textContent = '💾 자동저장';
+                    }, 3000);
+                    break;
+                default:
+                    indicator.textContent = '💾 자동저장';
+            }
+        }
+
+        // Firebase 데이터 관리
+        async function saveChecklistData() {
+            if (!firebaseInitialized) return;
+
+            updateSaveIndicator('saving');
+
+            try {
+                const schedule = getScheduleForDate(currentDate);
+                const dateStr = currentDate.toISOString().split('T')[0];
+                
+                const dailyData = schedule.map((item, index) => {
+                    const checkbox = document.getElementById(`checkbox-${index}`);
+                    return {
+                        time: item.time,
+                        task: item.task,
+                        type: item.type,
+                        completed: checkbox ? checkbox.checked : false
+                    };
+                });
+
+                await setDoc(doc(db, 'healthTracker', dateStr), {
+                    date: dateStr,
+                    dayOfWeek: dayNames[currentDate.getDay()],
+                    schedule: dailyData,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                updateSaveIndicator('saved');
+                console.log('✅ 체크리스트 저장 완료:', dateStr);
+
+            } catch (error) {
+                console.error('❌ 체크리스트 저장 실패:', error);
+                updateSaveIndicator('error');
+                showNotification('저장 실패: ' + error.message, 'error');
+            }
+        }
+
+        async function loadChecklistData() {
+            if (!firebaseInitialized) return;
+
+            try {
+                const dateStr = currentDate.toISOString().split('T')[0];
+                const docSnap = await getDoc(doc(db, 'healthTracker', dateStr));
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const schedule = data.schedule;
+
+                    schedule.forEach((item, index) => {
+                        const checkbox = document.getElementById(`checkbox-${index}`);
+                        if (checkbox) {
+                            checkbox.checked = item.completed;
+                        }
+                    });
+                    
+                    updateStats();
+                    console.log('📂 체크리스트 로드 완료:', dateStr);
+                }
+            } catch (error) {
+                console.error('❌ 체크리스트 로드 실패:', error);
+            }
+        }
+
+        // 영구 메모 관리
+        async function savePermanentMemo() {
+            if (!firebaseInitialized) return;
+
+            const memoTextarea = document.getElementById('permanentMemo');
+            if (!memoTextarea) return;
+
+            try {
+                const memoText = memoTextarea.value.trim();
+                
+                await setDoc(doc(db, 'permanentData', 'memo'), {
+                    content: memoText,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                console.log('📝 영구 메모 저장 완료');
+            } catch (error) {
+                console.error('❌ 메모 저장 실패:', error);
+                showNotification('메모 저장 실패', 'error');
+            }
+        }
+
+        async function loadPermanentMemo() {
+            if (!firebaseInitialized || memoLoaded) return;
+
+            try {
+                const docSnap = await getDoc(doc(db, 'permanentData', 'memo'));
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const memoTextarea = document.getElementById('permanentMemo');
+                    
+                    if (memoTextarea) {
+                        memoTextarea.value = data.content || '';
+                        updateMemoCount();
+                        memoLoaded = true;
+                    }
+                    
+                    console.log('📂 영구 메모 로드 완료');
+                }
+            } catch (error) {
+                console.error('❌ 메모 로드 실패:', error);
+            }
+        }
+
+        function updateMemoCount() {
+            const memoTextarea = document.getElementById('permanentMemo');
+            const memoCharCount = document.getElementById('memoCharCount');
+            
+            if (memoTextarea && memoCharCount) {
+                let length = memoTextarea.value.length;
+                
+                if (length > 1000) {
+                    memoTextarea.value = memoTextarea.value.substring(0, 1000);
+                    length = 1000;
+                }
+                
+                memoCharCount.textContent = length;
+                
+                if (length > 900) {
+                    memoCharCount.style.color = '#ef4444';
+                } else if (length > 800) {
+                    memoCharCount.style.color = '#f59e0b';
+                } else {
+                    memoCharCount.style.color = '#6b7280';
+                }
+            }
+        }
+
+        let memoSaveTimeout;
+        function setupMemoEvents() {
+            const memoTextarea = document.getElementById('permanentMemo');
+            const memoSaveBtn = document.getElementById('memoSaveBtn');
+            
+            if (memoTextarea) {
+                memoTextarea.addEventListener('input', updateMemoCount);
+                
+                memoTextarea.addEventListener('input', () => {
+                    clearTimeout(memoSaveTimeout);
+                    memoSaveTimeout = setTimeout(savePermanentMemo, 3000);
+                });
+            }
+            
+            if (memoSaveBtn) {
+                memoSaveBtn.addEventListener('click', () => {
+                    clearTimeout(memoSaveTimeout);
+                    savePermanentMemo();
+                    memoSaveBtn.textContent = '✅ 저장됨';
+                    memoSaveBtn.classList.add('saved');
+                    setTimeout(() => {
+                        memoSaveBtn.textContent = '💾 메모 저장';
+                        memoSaveBtn.classList.remove('saved');
+                    }, 2000);
+                });
+            }
+        }
+
+        // 이벤트 리스너 설정
+        function setupEventListeners() {
+            document.getElementById('prevDayBtn').addEventListener('click', () => {
+                currentDate.setDate(currentDate.getDate() - 1);
+                generateChecklist();
+                loadChecklistData();
+                updateWeightDisplay();
+            });
+            
+            document.getElementById('nextDayBtn').addEventListener('click', () => {
+                currentDate.setDate(currentDate.getDate() + 1);
+                generateChecklist();
+                loadChecklistData();
+                updateWeightDisplay();
+            });
+            
+            setupMemoEvents();
+            setupWeightEvents();
+        }
+
+        // 앱 초기화
+        async function startApp() {
+            console.log('🚀 건강관리 트래커 시작!');
+            
+            setupEventListeners();
+            updateCurrentTimeDisplay();
+            generateChecklist();
+            
+            // 주간 그래프 생성 (한번만)
+            await createWeeklyChart();
+            
+            // 데이터 로드
+            loadChecklistData();
+            loadPermanentMemo();
+            updateWeightDisplay();
+            
+            if (firebaseInitialized) {
+                showNotification('Firebase 연결 완료! 🔥', 'success');
+            } else {
+                showNotification('Firebase 연결 실패 - 로컬에서 작동', 'error');
+            }
+            
+            console.log('✅ 앱 초기화 완료');
+        }
+
+        // 시간 업데이트 타이머
+        setInterval(() => {
+            const taskIndices = updateCurrentTimeDisplay();
+            
+            // 하이라이트 업데이트
+            const schedule = getScheduleForDate(currentDate);
+            schedule.forEach((item, index) => {
+                const itemEl = document.getElementById(`item-${index}`);
+                if (itemEl) {
+                    itemEl.classList.remove('current-time', 'next-task');
+                    
+                    if (index === taskIndices.current) {
+                        itemEl.classList.add('current-time');
+                    } else if (index === taskIndices.next) {
+                        itemEl.classList.add('next-task');
+                    }
+                }
+            });
+        }, 60000);
+
+        // 앱 시작
+        document.addEventListener('DOMContentLoaded', startApp);
+    </script>
+</body>
+</html>
