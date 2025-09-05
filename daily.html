@@ -1471,6 +1471,7 @@
             console.log('✅ Firebase 연결 성공');
         } catch (error) {
             console.error('❌ Firebase 연결 실패:', error);
+            showNotification('Firebase 연결 실패 - 기능이 제한됩니다', 'error');
         }
 
         // 전역 변수
