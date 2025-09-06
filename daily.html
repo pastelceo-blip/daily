@@ -274,34 +274,36 @@
             overflow: visible;
         }
 
-        /* 막대 차트 영역 - 패딩 완전 제거 */
-        .weight-bars-container {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-evenly;
-            height: 220px;
-            margin: 10px 0;
-            padding: 0;
-        }
+/* 막대 차트 영역 - 패딩 완전 제거 */
+.weight-bars-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-evenly;
+    height: 220px;
+    margin: 10px 0;
+    padding: 0;
+    border-bottom: 2px solid #e2e8f0;  /* 이 줄 추가 */
+}
 
-        /* 개별 막대 */
-        .weight-bar-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            width: 35px;
-            height: 100%;
-        }
+/* 개별 막대 */
+.weight-bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 35px;
+    height: 100%;
+    justify-content: flex-end;  /* 이 줄 추가 */
+}
 
-        .weight-bar-main {
-            width: 100%;
-            border-radius: 6px 6px 2px 2px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-            margin-bottom: 5px;
-        }
+.weight-bar-main {
+    width: 100%;
+    border-radius: 6px 6px 2px 2px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 0;  /* 5px에서 0으로 변경 */
+}
 
         .weight-bar-main:hover {
             transform: translateY(-3px);
