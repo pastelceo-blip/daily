@@ -207,6 +207,7 @@
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
         }
 
+        /* 체중 그래프 - 완전히 새로 작성 */
         .weight-chart-section {
             background: var(--surface);
             border-radius: 15px;
@@ -263,175 +264,129 @@
             color: var(--text-secondary);
         }
 
-        .weight-chart {
-            height: 200px;
+        /* 체중 차트 컨테이너 - 여백 최소화 */
+        .weight-chart-wrapper {
             position: relative;
+            height: 300px;
             background: linear-gradient(145deg, #f8fafc, #f1f5f9);
-            border-radius: 16px;
-            padding: 24px;
-            overflow: hidden;
+            border-radius: 12px;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: visible;
         }
 
-        .weight-bar-chart {
+        /* 막대 차트 영역 - 패딩 완전 제거 */
+        .weight-bars-container {
             display: flex;
-            align-items: end;
-            justify-content: space-between;
-            height: 100%;
-            padding: 20px 10px 40px 10px;
-            gap: 8px;
+            align-items: flex-end;
+            justify-content: space-evenly;
+            height: 220px;
+            margin: 10px 0;
+            padding: 0;
         }
 
-        .weight-bar-container {
-            flex: 1;
+        /* 개별 막대 */
+        .weight-bar-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
-            max-width: 60px;
+            width: 35px;
+            height: 100%;
         }
 
-        .weight-bar {
+        .weight-bar-main {
             width: 100%;
-            background: linear-gradient(180deg, #6366f1, #4f46e5);
-            border-radius: 8px 8px 4px 4px;
-            position: relative;
+            border-radius: 6px 6px 2px 2px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
             cursor: pointer;
-            min-height: 15%;
-            border: 2px solid transparent;
+            position: relative;
+            margin-bottom: 5px;
         }
 
-        .weight-bar:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        .weight-bar-main:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
         }
 
-        .weight-bar.today {
-            background: linear-gradient(180deg, #10b981, #059669) !important;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
-            border-color: #10b981 !important;
+        /* 막대 색상 클래스 */
+        .weight-bar-main.today {
+            background: linear-gradient(180deg, #10b981, #059669);
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
         }
 
-        .weight-bar.high-increase {
-            background: linear-gradient(180deg, #ef4444, #dc2626) !important;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+        .weight-bar-main.increase-high {
+            background: linear-gradient(180deg, #ef4444, #dc2626);
+            box-shadow: 0 3px 10px rgba(239, 68, 68, 0.4);
         }
 
-        .weight-bar.medium-increase {
-            background: linear-gradient(180deg, #f59e0b, #d97706) !important;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
+        .weight-bar-main.increase-medium {
+            background: linear-gradient(180deg, #f59e0b, #d97706);
+            box-shadow: 0 3px 10px rgba(245, 158, 11, 0.4);
         }
 
-        .weight-bar.high-decrease {
-            background: linear-gradient(180deg, #059669, #047857) !important;
-            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4) !important;
+        .weight-bar-main.decrease-high {
+            background: linear-gradient(180deg, #059669, #047857);
+            box-shadow: 0 3px 10px rgba(5, 150, 105, 0.4);
         }
 
-        .weight-bar.medium-decrease {
-            background: linear-gradient(180deg, #10b981, #059669) !important;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+        .weight-bar-main.decrease-medium {
+            background: linear-gradient(180deg, #10b981, #059669);
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
         }
 
-        .weight-bar.stable {
-            background: linear-gradient(180deg, #3b82f6, #2563eb) !important;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+        .weight-bar-main.stable {
+            background: linear-gradient(180deg, #3b82f6, #2563eb);
+            box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
         }
 
-        .weight-value-label {
+        /* 체중 값 라벨 */
+        .weight-value-display {
             position: absolute;
-            top: -28px;
+            top: -25px;
             left: 50%;
             transform: translateX(-50%);
-            background: #1e293b;
+            background: #1f2937;
             color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .weight-day-label {
-            margin-top: 12px;
-            font-size: 12px;
+            padding: 3px 7px;
+            border-radius: 4px;
+            font-size: 10px;
             font-weight: 600;
-            color: #475569;
-            text-align: center;
+            white-space: nowrap;
+            z-index: 10;
         }
 
-        .weight-day-label.today {
+        /* 요일 라벨 */
+        .weight-day-display {
+            margin-top: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .weight-day-display.today {
             color: #10b981;
             font-weight: 700;
         }
 
-        .change-indicator {
+        /* 변화 표시기 */
+        .weight-change-badge {
             position: absolute;
             top: -8px;
-            right: -6px;
-            color: white;
-            padding: 2px 5px;
-            border-radius: 6px;
-            font-size: 9px;
-            font-weight: 700;
-            line-height: 1;
-            white-space: nowrap;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            z-index: 10;
-        }
-
-        .change-indicator.big-increase {
-            background: #ef4444;
-        }
-
-        .change-indicator.small-increase {
-            background: #f59e0b;
-        }
-
-        .change-indicator.big-decrease {
-            background: #10b981;
-        }
-
-        .change-indicator.small-decrease {
-            background: #059669;
-        }
-
-        .change-indicator.minimal {
-            background: #6b7280;
-        }
-
-        .avg-indicator {
-            position: absolute;
-            bottom: -8px;
-            left: -6px;
-            color: white;
+            right: -8px;
             padding: 1px 4px;
-            border-radius: 4px;
+            border-radius: 8px;
             font-size: 8px;
-            font-weight: 600;
-            line-height: 1;
-            z-index: 10;
+            font-weight: 700;
+            color: white;
+            z-index: 15;
         }
 
-        .avg-indicator.much-higher {
-            background: #ef4444;
-        }
+        .weight-change-badge.big-up { background: #ef4444; }
+        .weight-change-badge.small-up { background: #f59e0b; }
+        .weight-change-badge.big-down { background: #10b981; }
+        .weight-change-badge.small-down { background: #059669; }
+        .weight-change-badge.minimal { background: #6b7280; }
 
-        .avg-indicator.higher {
-            background: #f59e0b;
-        }
-
-        .avg-indicator.much-lower {
-            background: #10b981;
-        }
-
-        .avg-indicator.lower {
-            background: #059669;
-        }
-        
         .current-time-section {
             background: var(--surface);
             border-radius: 12px;
@@ -950,9 +905,16 @@
                 height: 70px;
             }
             
-            .weight-chart {
-                height: 240px;
-                padding: 20px;
+            .weight-chart-wrapper {
+                height: 250px;
+            }
+            
+            .weight-bars-container {
+                height: 180px;
+            }
+            
+            .weight-bar-item {
+                width: 30px;
             }
         }
     </style>
@@ -983,7 +945,7 @@
             </div>
         </div>
 
-        <!-- 체중 그래프 섹션 -->
+        <!-- 체중 그래프 섹션 - 완전히 새로 작성 -->
         <div class="weight-chart-section">
             <div class="weight-chart-header">
                 <div class="weight-chart-title">📈 최근 7일 체중 변화</div>
@@ -992,7 +954,7 @@
                     <span class="weight-trend" id="weightTrend">추세: -</span>
                 </div>
             </div>
-            <div class="weight-chart" id="weightChart">
+            <div class="weight-chart-wrapper" id="weightChartWrapper">
                 <div class="loading">체중 데이터 로딩중...</div>
             </div>
         </div>
@@ -1110,7 +1072,6 @@
         let currentDate = new Date();
         let memoLoaded = false;
         let weeklyChartCreated = false;
-        let dataLoadPromises = new Map();
 
         const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
         const dayNamesShort = ['일', '월', '화', '수', '목', '금', '토'];
@@ -1313,33 +1274,43 @@
             return results;
         }
 
+        // 완전히 새로 작성한 체중 차트 생성 함수
         function createWeightChart(weightData) {
-            const chartContainer = document.getElementById('weightChart');
-            if (!chartContainer) return;
+            const chartWrapper = document.getElementById('weightChartWrapper');
+            if (!chartWrapper) return;
             
-            chartContainer.innerHTML = '';
+            chartWrapper.innerHTML = '';
 
             if (!weightData || weightData.length === 0) {
-                chartContainer.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;"><div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div><div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div><div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div></div>';
+                chartWrapper.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;">
+                        <div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div>
+                        <div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div>
+                        <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div>
+                    </div>
+                `;
                 return;
             }
 
             const validData = weightData.filter(d => d.weight !== null);
             
             if (validData.length === 0) {
-                chartContainer.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;"><div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div><div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div><div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div></div>';
+                chartWrapper.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;">
+                        <div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div>
+                        <div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div>
+                        <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div>
+                    </div>
+                `;
                 return;
             }
-
-            const fragment = document.createDocumentFragment();
-            const barChartContainer = document.createElement('div');
-            barChartContainer.className = 'weight-bar-chart';
 
             const weights = validData.map(d => d.weight);
             const minWeight = Math.min(...weights);
             const maxWeight = Math.max(...weights);
             const range = maxWeight - minWeight;
             
+            // 차트 범위 계산
             let chartMinWeight, chartMaxWeight, weightRange;
             
             if (range <= 0.3) {
@@ -1362,46 +1333,35 @@
             const today = new Date().toISOString().split('T')[0];
             const avgWeight = weights.reduce((a, b) => a + b) / weights.length;
 
-            console.log('📊 체중 범위:', { 
-                실제범위: range.toFixed(2), 
-                차트최소: chartMinWeight.toFixed(1), 
-                차트최대: chartMaxWeight.toFixed(1),
-                차트범위: weightRange.toFixed(1) 
-            });
+            // 막대 차트 컨테이너 생성
+            const barsContainer = document.createElement('div');
+            barsContainer.className = 'weight-bars-container';
 
             validData.forEach((item, index) => {
-                const barContainer = document.createElement('div');
-                barContainer.className = 'weight-bar-container';
-
+                // 막대 높이 계산 - 50%~95% 범위에서 극명한 차이
                 let heightPercent;
                 if (validData.length === 1) {
-                    heightPercent = 50;
+                    heightPercent = 75;
                 } else {
                     const relativePosition = (item.weight - chartMinWeight) / weightRange;
-                    
-                    if (relativePosition <= 0.15) {
-                        heightPercent = 15 + (relativePosition / 0.15) * 15;
-                    } else if (relativePosition <= 0.35) {
-                        heightPercent = 30 + ((relativePosition - 0.15) / 0.2) * 20;
-                    } else if (relativePosition <= 0.65) {
-                        heightPercent = 50 + ((relativePosition - 0.35) / 0.3) * 20;
-                    } else if (relativePosition <= 0.85) {
-                        heightPercent = 70 + ((relativePosition - 0.65) / 0.2) * 15;
-                    } else {
-                        heightPercent = 85 + ((relativePosition - 0.85) / 0.15) * 10;
-                    }
-                    
-                    heightPercent = Math.max(15, Math.min(95, heightPercent));
+                    heightPercent = 50 + (relativePosition * 45); // 50%~95% 범위
+                    heightPercent = Math.max(50, Math.min(95, heightPercent));
                 }
 
-                const bar = document.createElement('div');
-                bar.className = 'weight-bar';
+                // 막대 아이템 생성
+                const barItem = document.createElement('div');
+                barItem.className = 'weight-bar-item';
+
+                // 메인 막대
+                const barMain = document.createElement('div');
+                barMain.className = 'weight-bar-main';
+                barMain.style.height = heightPercent + '%';
+
                 const isToday = item.date === today;
                 
-                bar.style.height = heightPercent + '%';
-                
+                // 색상 클래스 설정
                 if (isToday) {
-                    bar.classList.add('today');
+                    barMain.classList.add('today');
                 } else if (validData.length > 1) {
                     let weightChangeFromPrev = 0;
                     if (index > 0) {
@@ -1411,115 +1371,74 @@
                     const diffFromAvg = item.weight - avgWeight;
                     
                     if (Math.abs(diffFromAvg) <= 0.15 && Math.abs(weightChangeFromPrev) <= 0.1) {
-                        bar.classList.add('stable');
+                        barMain.classList.add('stable');
                     } else if (diffFromAvg > 0.5 || weightChangeFromPrev > 0.3) {
-                        bar.classList.add('high-increase');
+                        barMain.classList.add('increase-high');
                     } else if (diffFromAvg > 0.2 || weightChangeFromPrev > 0.1) {
-                        bar.classList.add('medium-increase');
+                        barMain.classList.add('increase-medium');
                     } else if (diffFromAvg < -0.5 || weightChangeFromPrev < -0.3) {
-                        bar.classList.add('high-decrease');
+                        barMain.classList.add('decrease-high');
                     } else if (diffFromAvg < -0.2 || weightChangeFromPrev < -0.1) {
-                        bar.classList.add('medium-decrease');
+                        barMain.classList.add('decrease-medium');
                     } else {
-                        bar.classList.add('stable');
+                        barMain.classList.add('stable');
                     }
                 } else {
-                    bar.classList.add('stable');
+                    barMain.classList.add('stable');
                 }
 
-                bar.addEventListener('mouseenter', () => {
-                    bar.style.transform = 'translateY(-4px)';
-                    bar.style.borderColor = '#ffffff';
-                });
-
-                bar.addEventListener('mouseleave', () => {
-                    bar.style.transform = 'translateY(0)';
-                    bar.style.borderColor = 'transparent';
-                });
-
+                // 체중 값 라벨
                 const valueLabel = document.createElement('div');
-                valueLabel.className = 'weight-value-label';
+                valueLabel.className = 'weight-value-display';
                 valueLabel.textContent = `${item.weight.toFixed(1)}kg`;
+                barMain.appendChild(valueLabel);
 
+                // 변화량 표시
                 if (index > 0) {
                     const prevWeight = validData[index - 1].weight;
                     const change = item.weight - prevWeight;
                     
                     if (Math.abs(change) >= 0.05) {
-                        const changeIndicator = document.createElement('div');
-                        changeIndicator.className = 'change-indicator';
+                        const changeBadge = document.createElement('div');
+                        changeBadge.className = 'weight-change-badge';
                         
-                        let changeSymbol, changeText, changeClass;
+                        let changeText, changeClass;
                         if (change > 0.3) {
-                            changeClass = 'big-increase';
-                            changeSymbol = '⬆⬆';
+                            changeClass = 'big-up';
                             changeText = `+${change.toFixed(1)}`;
                         } else if (change > 0.1) {
-                            changeClass = 'small-increase';
-                            changeSymbol = '⬆';
+                            changeClass = 'small-up';
                             changeText = `+${change.toFixed(1)}`;
                         } else if (change < -0.3) {
-                            changeClass = 'big-decrease';
-                            changeSymbol = '⬇⬇';
+                            changeClass = 'big-down';
                             changeText = `${change.toFixed(1)}`;
                         } else if (change < -0.1) {
-                            changeClass = 'small-decrease';
-                            changeSymbol = '⬇';
+                            changeClass = 'small-down';
                             changeText = `${change.toFixed(1)}`;
                         } else {
                             changeClass = 'minimal';
-                            changeSymbol = '→';
                             changeText = `${change >= 0 ? '+' : ''}${change.toFixed(1)}`;
                         }
                         
-                        changeIndicator.classList.add(changeClass);
-                        changeIndicator.textContent = `${changeSymbol} ${changeText}kg`;
-                        changeIndicator.title = `이전 대비 ${change > 0 ? '증가' : '감소'}: ${Math.abs(change).toFixed(1)}kg`;
+                        changeBadge.classList.add(changeClass);
+                        changeBadge.textContent = changeText;
                         
-                        bar.appendChild(changeIndicator);
+                        barMain.appendChild(changeBadge);
                     }
                 }
 
-                const diffFromAvg = item.weight - avgWeight;
-                if (validData.length > 2 && Math.abs(diffFromAvg) > 0.2) {
-                    const avgIndicator = document.createElement('div');
-                    avgIndicator.className = 'avg-indicator';
-                    
-                    let avgText, avgClass;
-                    if (diffFromAvg > 0.5) {
-                        avgClass = 'much-higher';
-                        avgText = '높음';
-                    } else if (diffFromAvg > 0.2) {
-                        avgClass = 'higher';
-                        avgText = '↑';
-                    } else if (diffFromAvg < -0.5) {
-                        avgClass = 'much-lower';
-                        avgText = '낮음';
-                    } else {
-                        avgClass = 'lower';
-                        avgText = '↓';
-                    }
-                    
-                    avgIndicator.classList.add(avgClass);
-                    avgIndicator.textContent = avgText;
-                    avgIndicator.title = `평균 대비: ${diffFromAvg > 0 ? '+' : ''}${diffFromAvg.toFixed(1)}kg`;
-                    
-                    bar.appendChild(avgIndicator);
-                }
-
+                // 요일 라벨
                 const dayLabel = document.createElement('div');
-                dayLabel.className = `weight-day-label ${isToday ? 'today' : ''}`;
+                dayLabel.className = `weight-day-display ${isToday ? 'today' : ''}`;
                 dayLabel.textContent = item.day;
 
-                bar.appendChild(valueLabel);
-                barContainer.appendChild(bar);
-                barContainer.appendChild(dayLabel);
-                barChartContainer.appendChild(barContainer);
+                barItem.appendChild(barMain);
+                barItem.appendChild(dayLabel);
+                barsContainer.appendChild(barItem);
             });
 
-            fragment.appendChild(barChartContainer);
-            chartContainer.appendChild(fragment);
-            console.log('📊 체중 그래프 생성 완료');
+            chartWrapper.appendChild(barsContainer);
+            console.log('📊 새로운 체중 그래프 생성 완료');
         }
 
         function updateWeightStats(weightData) {
@@ -2326,4 +2245,4 @@
         });
     </script>
 </body>
-</html>)
+</html>
