@@ -1769,13 +1769,39 @@
             const weights = validData.map(d => d.weight);
             const minWeight = Math.min(...weights);
             const maxWeight = Math.max(...weights);
-            const range = maxWeight - minWeight || 2;
-            const padding = Math.max(range * 0.1, 1);
-            const chartMinWeight = minWeight - padding;
-            const chartMaxWeight = maxWeight + padding;
-            const weightRange = chartMaxWeight - chartMinWeight;
+            const range = maxWeight - minWeight;
+            
+            // 변화 감지를 위한 개선된 범위 계산
+            let chartMinWeight, chartMaxWeight, weightRange;
+            
+            if (range <= 0.5) {
+                // 변화가 작을 때: 고정된 범위 사용 (±2kg)
+                const avgWeight = weights.reduce((a, b) => a + b) / weights.length;
+                chartMinWeight = avgWeight - 2;
+                chartMaxWeight = avgWeight + 2;
+                weightRange = 4;
+            } else if (range <= 2) {
+                // 중간 변화: 50% 패딩
+                const padding = range * 0.5;
+                chartMinWeight = minWeight - padding;
+                chartMaxWeight = maxWeight + padding;
+                weightRange = chartMaxWeight - chartMinWeight;
+            } else {
+                // 큰 변화: 20% 패딩
+                const padding = range * 0.2;
+                chartMinWeight = minWeight - padding;
+                chartMaxWeight = maxWeight + padding;
+                weightRange = chartMaxWeight - chartMinWeight;
+            }
 
-            console.log('📊 체중 범위:', { minWeight, maxWeight, chartMinWeight, chartMaxWeight });
+            console.log('📊 체중 범위:', { 
+                minWeight, 
+                maxWeight, 
+                range, 
+                chartMinWeight: chartMinWeight.toFixed(1), 
+                chartMaxWeight: chartMaxWeight.toFixed(1),
+                weightRange: weightRange.toFixed(1) 
+            });
 
             // 오늘 날짜
             const today = new Date().toISOString().split('T')[0];
@@ -1792,14 +1818,32 @@
                     max-width: 60px;
                 `;
 
-                // 막대 높이 계산 (최소 20%, 최대 100%)
-                const heightPercent = Math.max(20, ((item.weight - chartMinWeight) / weightRange) * 100);
-                console.log(`📊 막대 ${index}: ${item.day}, 체중: ${item.weight}kg, 높이: ${heightPercent}%`);
+                // 막대 높이 계산 (10%~90% 범위 사용으로 변화 강조)
+                const rawPercent = ((item.weight - chartMinWeight) / weightRange) * 100;
+                const heightPercent = Math.max(10, Math.min(90, 10 + (rawPercent * 0.8)));
+                
+                console.log(`📊 막대 ${index}: ${item.day}, 체중: ${item.weight}kg, 높이: ${heightPercent.toFixed(1)}%`);
 
                 // 막대 생성 - 인라인 스타일로 직접 적용
                 const bar = document.createElement('div');
                 const isToday = item.date === today;
-                const bgColor = isToday ? 'linear-gradient(180deg, #10b981, #059669)' : 'linear-gradient(180deg, #6366f1, #4f46e5)';
+                
+                // 체중 변화에 따른 색상 변경
+                let bgColor;
+                if (isToday) {
+                    bgColor = 'linear-gradient(180deg, #10b981, #059669)'; // 오늘: 초록색
+                } else if (validData.length > 1) {
+                    const avgWeight = weights.reduce((a, b) => a + b) / weights.length;
+                    if (item.weight > avgWeight + 0.2) {
+                        bgColor = 'linear-gradient(180deg, #f59e0b, #d97706)'; // 평균보다 높음: 주황색
+                    } else if (item.weight < avgWeight - 0.2) {
+                        bgColor = 'linear-gradient(180deg, #3b82f6, #2563eb)'; // 평균보다 낮음: 파란색
+                    } else {
+                        bgColor = 'linear-gradient(180deg, #6366f1, #4f46e5)'; // 평균: 보라색
+                    }
+                } else {
+                    bgColor = 'linear-gradient(180deg, #6366f1, #4f46e5)'; // 기본: 보라색
+                }
                 
                 bar.style.cssText = `
                     width: 100%;
@@ -1810,38 +1854,67 @@
                     transition: all 0.3s ease;
                     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
                     cursor: pointer;
-                    min-height: 20%;
+                    border: 2px solid transparent;
                 `;
 
                 // 호버 효과
                 bar.addEventListener('mouseenter', () => {
                     bar.style.transform = 'translateY(-4px)';
                     bar.style.boxShadow = '0 8px 20px rgba(99, 102, 241, 0.4)';
+                    bar.style.borderColor = '#ffffff';
                 });
 
                 bar.addEventListener('mouseleave', () => {
                     bar.style.transform = 'translateY(0)';
                     bar.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
+                    bar.style.borderColor = 'transparent';
                 });
 
                 // 체중 값 라벨
                 const valueLabel = document.createElement('div');
                 valueLabel.style.cssText = `
                     position: absolute;
-                    top: -28px;
+                    top: -32px;
                     left: 50%;
                     transform: translateX(-50%);
                     background: #1e293b;
                     color: white;
-                    padding: 4px 8px;
-                    border-radius: 6px;
-                    font-size: 11px;
+                    padding: 5px 9px;
+                    border-radius: 8px;
+                    font-size: 12px;
                     font-weight: 700;
                     white-space: nowrap;
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+                    z-index: 10;
                 `;
                 valueLabel.textContent = `${item.weight.toFixed(1)}kg`;
+
+                // 변화량 표시 (이전 데이터와 비교)
+                if (index > 0) {
+                    const prevWeight = validData[index - 1].weight;
+                    const change = item.weight - prevWeight;
+                    if (Math.abs(change) >= 0.1) {
+                        const changeIndicator = document.createElement('div');
+                        const changeColor = change > 0 ? '#f59e0b' : '#3b82f6';
+                        const changeSymbol = change > 0 ? '↗' : '↘';
+                        
+                        changeIndicator.style.cssText = `
+                            position: absolute;
+                            top: -10px;
+                            right: -8px;
+                            background: ${changeColor};
+                            color: white;
+                            padding: 2px 4px;
+                            border-radius: 4px;
+                            font-size: 10px;
+                            font-weight: 600;
+                            line-height: 1;
+                        `;
+                        changeIndicator.textContent = changeSymbol;
+                        bar.appendChild(changeIndicator);
+                    }
+                }
 
                 // 날짜 라벨
                 const dayLabel = document.createElement('div');
