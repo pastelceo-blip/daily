@@ -1818,11 +1818,24 @@
                     max-width: 60px;
                 `;
 
-                // 막대 높이 계산 (10%~90% 범위 사용으로 변화 강조)
-                const rawPercent = ((item.weight - chartMinWeight) / weightRange) * 100;
-                const heightPercent = Math.max(10, Math.min(90, 10 + (rawPercent * 0.8)));
+                // 막대 높이 계산 - 극단적 차이 강조
+                let heightPercent;
                 
-                console.log(`📊 막대 ${index}: ${item.day}, 체중: ${item.weight}kg, 높이: ${heightPercent.toFixed(1)}%`);
+                if (validData.length === 1) {
+                    // 데이터가 하나뿐이면 중간 높이
+                    heightPercent = 50;
+                } else {
+                    // 상대적 위치 계산 (0-1 범위)
+                    const relativePosition = (item.weight - chartMinWeight) / weightRange;
+                    
+                    // 0-1 범위를 15%-85% 높이로 매핑 (더 극단적인 차이)
+                    heightPercent = 15 + (relativePosition * 70);
+                    
+                    // 최소/최대 제한
+                    heightPercent = Math.max(10, Math.min(90, heightPercent));
+                }
+                
+                console.log(`📊 막대 ${index}: ${item.day}, 체중: ${item.weight}kg, 상대위치: ${((item.weight - chartMinWeight) / weightRange * 100).toFixed(1)}%, 높이: ${heightPercent.toFixed(1)}%`);
 
                 // 막대 생성 - 인라인 스타일로 직접 적용
                 const bar = document.createElement('div');
