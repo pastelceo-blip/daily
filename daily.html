@@ -2570,7 +2570,10 @@
                 updateCurrentTimeDisplay();
                 generateChecklist();
                 
-                // 2. Firebase 초기화 (백그라운드)
+                // 2. 주간 차트 먼저 골격 생성 (Firebase 없이도 작동)
+                await createWeeklyChart();
+                
+                // 3. Firebase 초기화 (백그라운드)
                 console.log('🔄 Firebase 초기화 시도...');
                 const firebaseConnected = await initializeFirebase();
                 
@@ -2578,15 +2581,14 @@
                     console.log('✅ Firebase 연결 성공 - 데이터 로딩 시작');
                     showNotification('Firebase 연결 완료! 데이터를 로딩합니다.', 'success');
                     
-                    // 3. 각 기능별로 개별 로딩 (실패해도 다른 기능에 영향 없음)
+                    // 4. Firebase 연결 후 실제 데이터 로딩
                     const loadingPromises = [
                         loadChecklistData().catch(e => console.error('체크리스트 로딩 실패:', e)),
                         loadPermanentMemo().catch(e => console.error('메모 로딩 실패:', e)),
                         updateWeightDisplay().catch(e => console.error('체중 데이터 로딩 실패:', e)),
-                        createWeeklyChart().catch(e => console.error('주간차트 생성 실패:', e))
+                        loadWeeklyData().catch(e => console.error('주간차트 데이터 로딩 실패:', e))
                     ];
                     
-                    // 모든 로딩이 완료될 때까지 기다리지만, 실패해도 계속 진행
                     await Promise.allSettled(loadingPromises);
                     
                     console.log('✅ 모든 데이터 로딩 완료');
@@ -2595,10 +2597,9 @@
                     console.warn('⚠️ Firebase 연결 실패 - 로컬 모드로 동작');
                     showNotification('로컬 모드로 동작합니다 (데이터 저장 불가)', 'error');
                     
-                    // Firebase 없이도 기본 차트는 생성
-                    createWeeklyChart();
+                    // Firebase 없이도 기본 차트와 테스트 데이터 표시
+                    showTestWeeklyData();
                     
-                    // 체중 차트도 빈 상태로 표시
                     const weightChartWrapper = document.getElementById('weightChartWrapper');
                     if (weightChartWrapper) {
                         weightChartWrapper.innerHTML = `
@@ -2622,7 +2623,8 @@
                     setupEventListeners();
                     updateCurrentTimeDisplay();
                     generateChecklist();
-                    createWeeklyChart();
+                    await createWeeklyChart();
+                    showTestWeeklyData();
                 } catch (fallbackError) {
                     console.error('기본 UI 초기화도 실패:', fallbackError);
                 }
