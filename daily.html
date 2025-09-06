@@ -265,14 +265,17 @@
         }
 
         /* 체중 차트 컨테이너 - 여백 최소화 */
-        .weight-chart-wrapper {
-            position: relative;
-            height: 300px;
-            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            overflow: visible;
-        }
+.weight-chart-wrapper {
+    position: relative;
+    height: 300px;
+    background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 /* 막대 차트 영역 - 패딩 완전 제거 */
 .weight-bars-container {
@@ -280,10 +283,12 @@
     align-items: flex-end;
     justify-content: space-evenly;
     height: 180px;
-    margin: 30px 0 15px 0;  /* 이 부분을 변경함 */
+    margin: 0;
     padding: 0;
     border-bottom: 2px solid #e2e8f0;
+    width: 100%;
 }
+
 /* 개별 막대 */
 .weight-bar-item {
     display: flex;
