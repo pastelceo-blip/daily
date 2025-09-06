@@ -1735,18 +1735,25 @@
             const chartContainer = document.getElementById('weightChart');
             chartContainer.innerHTML = '';
 
+            console.log('📊 createWeightChart 호출됨, 데이터:', weightData);
+
             if (!weightData || weightData.length === 0) {
+                console.log('📊 데이터가 없음 - 빈 메시지 표시');
                 chartContainer.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;"><div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div><div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div><div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div></div>';
                 return;
             }
 
             // 실제 체중 데이터가 있는 항목들만 필터링
             const validData = weightData.filter(d => d.weight !== null);
+            console.log('📊 유효한 체중 데이터:', validData);
             
             if (validData.length === 0) {
+                console.log('📊 유효한 데이터가 없음 - 빈 메시지 표시');
                 chartContainer.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;"><div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div><div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div><div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div></div>';
                 return;
             }
+
+            console.log('📊 막대 그래프 생성 시작...');
 
             // 막대 그래프 컨테이너 생성 - 인라인 스타일로 직접 적용
             const barChartContainer = document.createElement('div');
@@ -1768,6 +1775,8 @@
             const chartMaxWeight = maxWeight + padding;
             const weightRange = chartMaxWeight - chartMinWeight;
 
+            console.log('📊 체중 범위:', { minWeight, maxWeight, chartMinWeight, chartMaxWeight });
+
             // 오늘 날짜
             const today = new Date().toISOString().split('T')[0];
 
@@ -1785,6 +1794,7 @@
 
                 // 막대 높이 계산 (최소 20%, 최대 100%)
                 const heightPercent = Math.max(20, ((item.weight - chartMinWeight) / weightRange) * 100);
+                console.log(`📊 막대 ${index}: ${item.day}, 체중: ${item.weight}kg, 높이: ${heightPercent}%`);
 
                 // 막대 생성 - 인라인 스타일로 직접 적용
                 const bar = document.createElement('div');
@@ -1855,6 +1865,7 @@
             });
 
             chartContainer.appendChild(barChartContainer);
+            console.log('📊 막대 그래프 생성 완료');
         }
 
         function updateWeightStats(weightData) {
