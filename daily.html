@@ -1748,9 +1748,16 @@
                 return;
             }
 
-            // 막대 그래프 컨테이너 생성
+            // 막대 그래프 컨테이너 생성 - 인라인 스타일로 직접 적용
             const barChartContainer = document.createElement('div');
-            barChartContainer.className = 'weight-bar-chart';
+            barChartContainer.style.cssText = `
+                display: flex;
+                align-items: end;
+                justify-content: space-between;
+                height: 100%;
+                padding: 20px 10px 40px 10px;
+                gap: 8px;
+            `;
 
             const weights = validData.map(d => d.weight);
             const minWeight = Math.min(...weights);
@@ -1767,20 +1774,34 @@
             // 각 데이터에 대한 막대 생성
             validData.forEach((item, index) => {
                 const barContainer = document.createElement('div');
-                barContainer.className = 'weight-bar-container';
+                barContainer.style.cssText = `
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    position: relative;
+                    max-width: 60px;
+                `;
 
                 // 막대 높이 계산 (최소 20%, 최대 100%)
                 const heightPercent = Math.max(20, ((item.weight - chartMinWeight) / weightRange) * 100);
 
-                // 막대 생성
+                // 막대 생성 - 인라인 스타일로 직접 적용
                 const bar = document.createElement('div');
-                bar.className = 'weight-bar';
-                bar.style.height = `${heightPercent}%`;
-
-                // 오늘 날짜 하이라이트
-                if (item.date === today) {
-                    bar.classList.add('today');
-                }
+                const isToday = item.date === today;
+                const bgColor = isToday ? 'linear-gradient(180deg, #10b981, #059669)' : 'linear-gradient(180deg, #6366f1, #4f46e5)';
+                
+                bar.style.cssText = `
+                    width: 100%;
+                    height: ${heightPercent}%;
+                    background: ${bgColor};
+                    border-radius: 8px 8px 4px 4px;
+                    position: relative;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+                    cursor: pointer;
+                    min-height: 20%;
+                `;
 
                 // 호버 효과
                 bar.addEventListener('mouseenter', () => {
@@ -1795,18 +1816,37 @@
 
                 // 체중 값 라벨
                 const valueLabel = document.createElement('div');
-                valueLabel.className = 'weight-value-label';
+                valueLabel.style.cssText = `
+                    position: absolute;
+                    top: -28px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #1e293b;
+                    color: white;
+                    padding: 4px 8px;
+                    border-radius: 6px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    white-space: nowrap;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                `;
                 valueLabel.textContent = `${item.weight.toFixed(1)}kg`;
 
                 // 날짜 라벨
                 const dayLabel = document.createElement('div');
-                dayLabel.className = 'weight-day-label';
+                const labelColor = isToday ? '#10b981' : '#475569';
+                const labelWeight = isToday ? '700' : '600';
+                
+                dayLabel.style.cssText = `
+                    margin-top: 12px;
+                    font-size: 12px;
+                    font-weight: ${labelWeight};
+                    color: ${labelColor};
+                    text-align: center;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                `;
                 dayLabel.textContent = item.day;
-
-                // 오늘 날짜 라벨 하이라이트
-                if (item.date === today) {
-                    dayLabel.classList.add('today');
-                }
 
                 bar.appendChild(valueLabel);
                 barContainer.appendChild(bar);
