@@ -102,7 +102,6 @@
             text-align: center;
         }
 
-        /* 주간 달성률 그래프 스타일 */
         .weekly-progress-section {
             background: var(--surface);
             border-radius: 15px;
@@ -208,7 +207,6 @@
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
         }
 
-        /* 체중 그래프 섹션 스타일 */
         .weight-chart-section {
             background: var(--surface);
             border-radius: 15px;
@@ -302,7 +300,8 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
             cursor: pointer;
-            min-height: 20%;
+            min-height: 15%;
+            border: 2px solid transparent;
         }
 
         .weight-bar:hover {
@@ -311,7 +310,34 @@
         }
 
         .weight-bar.today {
-            background: linear-gradient(180deg, #10b981, #059669);
+            background: linear-gradient(180deg, #10b981, #059669) !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+            border-color: #10b981 !important;
+        }
+
+        .weight-bar.high-increase {
+            background: linear-gradient(180deg, #ef4444, #dc2626) !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+        }
+
+        .weight-bar.medium-increase {
+            background: linear-gradient(180deg, #f59e0b, #d97706) !important;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
+        }
+
+        .weight-bar.high-decrease {
+            background: linear-gradient(180deg, #059669, #047857) !important;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4) !important;
+        }
+
+        .weight-bar.medium-decrease {
+            background: linear-gradient(180deg, #10b981, #059669) !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+        }
+
+        .weight-bar.stable {
+            background: linear-gradient(180deg, #3b82f6, #2563eb) !important;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
         }
 
         .weight-value-label {
@@ -326,7 +352,6 @@
             font-size: 11px;
             font-weight: 700;
             white-space: nowrap;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
@@ -336,12 +361,75 @@
             font-weight: 600;
             color: #475569;
             text-align: center;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         .weight-day-label.today {
             color: #10b981;
             font-weight: 700;
+        }
+
+        .change-indicator {
+            position: absolute;
+            top: -8px;
+            right: -6px;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .change-indicator.big-increase {
+            background: #ef4444;
+        }
+
+        .change-indicator.small-increase {
+            background: #f59e0b;
+        }
+
+        .change-indicator.big-decrease {
+            background: #10b981;
+        }
+
+        .change-indicator.small-decrease {
+            background: #059669;
+        }
+
+        .change-indicator.minimal {
+            background: #6b7280;
+        }
+
+        .avg-indicator {
+            position: absolute;
+            bottom: -8px;
+            left: -6px;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 600;
+            line-height: 1;
+            z-index: 10;
+        }
+
+        .avg-indicator.much-higher {
+            background: #ef4444;
+        }
+
+        .avg-indicator.higher {
+            background: #f59e0b;
+        }
+
+        .avg-indicator.much-lower {
+            background: #10b981;
+        }
+
+        .avg-indicator.lower {
+            background: #059669;
         }
         
         .current-time-section {
@@ -600,7 +688,7 @@
         }
         
         .checklist-item.current-time::before {
-            content: "🔥 지금 할 시간!";
+            content: "지금 할 시간!";
             position: absolute;
             top: -10px;
             right: 12px;
@@ -653,7 +741,6 @@
             font-weight: 500;
         }
 
-        /* 체중 입력 섹션 스타일 */
         .weight-input-section {
             background: var(--surface);
             border-radius: 15px;
@@ -798,7 +885,6 @@
             border-left: 4px solid #ef4444;
         }
 
-        /* 로딩 표시 */
         .loading {
             display: flex;
             justify-content: center;
@@ -843,56 +929,15 @@
                 line-height: 1.2;
             }
             
-            .header p {
-                font-size: 0.8rem;
-                opacity: 0.9;
+            .current-time {
+                font-size: 1.4rem;
+                margin-bottom: 6px;
             }
             
-            .date-controls {
-                margin: 12px 0;
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
-            }
-            
-            .date-nav {
-                padding: 8px 12px;
-                gap: 8px;
-                border-radius: 10px;
-            }
-            
-            .nav-btn {
-                padding: 6px 10px;
-                font-size: 0.75rem;
-                border-radius: 6px;
-                min-height: 32px;
-            }
-            
-            .date-display {
-                font-size: 0.85rem;
-                min-width: 140px;
-            }
-            
-            .weekly-progress-section {
-                padding: 12px;
                 margin-bottom: 12px;
-                border-radius: 12px;
-            }
-            
-            .weekly-progress-header {
-                flex-direction: row;
-                align-items: center;
-                justify-content: space-between;
-                gap: 6px;
-                margin-bottom: 10px;
-            }
-            
-            .weekly-progress-title {
-                font-size: 1rem;
-            }
-            
-            .weekly-average {
-                padding: 4px 8px;
-                font-size: 0.7rem;
-                border-radius: 12px;
             }
             
             .weekly-chart { 
@@ -903,461 +948,11 @@
             
             .bar-container { 
                 height: 70px;
-                border-radius: 4px 4px 2px 2px;
             }
             
-            .bar-percentage {
-                font-size: 0.6rem;
-                top: -14px;
-                padding: 1px 3px;
-                border-radius: 2px;
-            }
-            
-            .day-label {
-                font-size: 0.7rem;
-                margin-top: 4px;
-            }
-
-            .weight-chart-section {
-                padding: 12px;
-                margin-bottom: 12px;
-                border-radius: 12px;
-            }
-
-            .weight-chart-header {
-                margin-bottom: 10px;
-                padding-bottom: 6px;
-            }
-
             .weight-chart {
                 height: 180px;
                 padding: 20px;
-                border-radius: 14px;
-            }
-
-            .weight-chart-title {
-                font-size: 0.95rem;
-            }
-
-            .weight-stats {
-                gap: 6px;
-            }
-
-            .weight-change, .weight-trend {
-                font-size: 0.7rem;
-                padding: 3px 6px;
-            }
-            
-            .current-time-section {
-                padding: 12px;
-                margin-bottom: 10px;
-                border-radius: 10px;
-            }
-            
-            .current-time {
-                font-size: 1.4rem;
-                margin-bottom: 6px;
-            }
-            
-            .current-task {
-                font-size: 0.85rem;
-                padding: 8px;
-                border-radius: 6px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-                margin-bottom: 12px;
-            }
-            
-            .stat-card {
-                padding: 10px;
-                border-radius: 10px;
-            }
-            
-            .stat-icon {
-                font-size: 1.2rem;
-                margin-bottom: 4px;
-            }
-            
-            .stat-title {
-                font-size: 0.7rem;
-                margin-bottom: 3px;
-            }
-            
-            .stat-value {
-                font-size: 1.1rem;
-                margin-bottom: 4px;
-            }
-            
-            .progress-bar {
-                height: 6px;
-            }
-            
-            .completion-celebration {
-                padding: 12px;
-                margin-bottom: 10px;
-                border-radius: 10px;
-            }
-            
-            .completion-celebration h2 {
-                font-size: 1.1rem;
-                margin-bottom: 4px;
-            }
-            
-            .completion-celebration p {
-                font-size: 0.8rem;
-            }
-            
-            .memo-section { 
-                padding: 12px;
-                margin-bottom: 12px;
-                border-radius: 12px;
-            }
-            
-            .memo-header { 
-                margin-bottom: 8px;
-                padding-bottom: 6px;
-            }
-            
-            .memo-header h3 {
-                font-size: 0.95rem;
-            }
-            
-            .memo-info {
-                font-size: 0.7rem;
-            }
-            
-            #permanentMemo {
-                min-height: 70px;
-                padding: 10px;
-                font-size: 0.8rem;
-                border-radius: 8px;
-            }
-            
-            .memo-footer { 
-                margin-top: 8px;
-            }
-            
-            .memo-count {
-                font-size: 0.7rem;
-            }
-            
-            .memo-save-btn {
-                padding: 6px 12px;
-                font-size: 0.75rem;
-                border-radius: 6px;
-            }
-            
-            .checklist-container {
-                padding: 12px;
-                margin-bottom: 12px;
-                border-radius: 12px;
-            }
-            
-            .checklist-header {
-                margin-bottom: 10px;
-                padding-bottom: 6px;
-            }
-            
-            .checklist-title {
-                font-size: 1rem;
-            }
-            
-            .completion-badge {
-                font-size: 0.7rem;
-                padding: 4px 8px;
-                border-radius: 12px;
-            }
-            
-            .checklist {
-                gap: 6px;
-            }
-            
-            .checklist-item { 
-                padding: 8px;
-                border-radius: 8px;
-                min-height: 44px;
-            }
-            
-            .checklist-item.current-time::before {
-                top: -6px;
-                right: 6px;
-                font-size: 0.55rem;
-                padding: 2px 4px;
-                border-radius: 8px;
-            }
-            
-            .checkbox {
-                width: 18px;
-                height: 18px;
-                margin-right: 10px;
-                flex-shrink: 0;
-            }
-            
-            .time-badge { 
-                font-size: 0.65rem;
-                padding: 4px 6px;
-                border-radius: 4px;
-                margin-right: 8px;
-                min-width: 80px;
-                flex-shrink: 0;
-            }
-            
-            .task-text {
-                font-size: 0.8rem;
-                line-height: 1.3;
-            }
-
-            .weight-input-section {
-                padding: 12px;
-                margin-bottom: 12px;
-                border-radius: 12px;
-            }
-
-            .weight-input-header {
-                margin-bottom: 8px;
-                padding-bottom: 6px;
-            }
-
-            .weight-input-header h3 {
-                font-size: 0.95rem;
-            }
-
-            .weight-info {
-                font-size: 0.7rem;
-            }
-
-            .weight-input-group {
-                gap: 6px;
-                margin-bottom: 8px;
-            }
-
-            #weightInput {
-                padding: 8px 10px;
-                font-size: 0.8rem;
-                max-width: 100px;
-            }
-
-            .weight-save-btn {
-                padding: 8px 12px;
-                font-size: 0.75rem;
-            }
-
-            .weight-current {
-                font-size: 0.8rem;
-                padding: 6px 10px;
-            }
-            
-            .save-indicator {
-                bottom: 12px;
-                right: 12px;
-                padding: 8px 12px;
-                font-size: 0.75rem;
-                border-radius: 20px;
-            }
-            
-            .notification {
-                top: 8px;
-                right: 8px;
-                left: 8px;
-                padding: 8px 10px;
-                font-size: 0.8rem;
-                border-radius: 8px;
-            }
-        }
-        
-        /* 초소형 화면 */
-        @media (max-width: 430px) {
-            .container {
-                padding: 6px;
-            }
-            
-            .header {
-                padding: 14px 10px;
-                margin-bottom: 10px;
-            }
-            
-            .header h1 {
-                font-size: 1.3rem;
-                margin-bottom: 3px;
-            }
-            
-            .header p {
-                font-size: 0.75rem;
-            }
-            
-            .date-nav {
-                padding: 6px 10px;
-                gap: 6px;
-            }
-            
-            .nav-btn {
-                padding: 5px 8px;
-                font-size: 0.7rem;
-                min-height: 30px;
-            }
-            
-            .date-display {
-                font-size: 0.8rem;
-                min-width: 130px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 6px;
-            }
-            
-            .stat-card {
-                padding: 8px;
-            }
-            
-            .stat-icon {
-                font-size: 1.1rem;
-                margin-bottom: 3px;
-            }
-            
-            .stat-title {
-                font-size: 0.65rem;
-                margin-bottom: 2px;
-            }
-            
-            .stat-value {
-                font-size: 1rem;
-                margin-bottom: 3px;
-            }
-            
-            .current-time {
-                font-size: 1.2rem;
-                margin-bottom: 5px;
-            }
-            
-            .current-task {
-                font-size: 0.8rem;
-                padding: 6px;
-            }
-            
-            .weekly-chart {
-                height: 75px;
-                gap: 2px;
-                padding: 6px 0;
-            }
-            
-            .bar-container {
-                height: 60px;
-            }
-            
-            .bar-percentage {
-                font-size: 0.55rem;
-                top: -12px;
-            }
-            
-            .day-label {
-                font-size: 0.65rem;
-                margin-top: 3px;
-            }
-
-            .weight-chart {
-                height: 160px;
-                padding: 16px;
-            }
-
-            #weightInput {
-                max-width: 90px;
-                padding: 6px 8px;
-                font-size: 0.75rem;
-            }
-
-            .weight-current {
-                font-size: 0.75rem;
-                padding: 5px 8px;
-            }
-            
-            .checklist-item {
-                padding: 6px;
-                min-height: 40px;
-            }
-            
-            .checkbox {
-                width: 16px;
-                height: 16px;
-                margin-right: 8px;
-            }
-            
-            .time-badge {
-                font-size: 0.6rem;
-                padding: 3px 5px;
-                margin-right: 6px;
-                min-width: 75px;
-            }
-            
-            .task-text {
-                font-size: 0.75rem;
-                line-height: 1.2;
-            }
-            
-            #permanentMemo {
-                min-height: 60px;
-                padding: 8px;
-                font-size: 0.75rem;
-            }
-        }
-        
-        /* 매우 작은 화면 */
-        @media (max-width: 360px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 5px;
-            }
-            
-            .weekly-chart {
-                height: 65px;
-                gap: 1px;
-            }
-            
-            .bar-container {
-                height: 50px;
-            }
-
-            .weight-input-group {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-
-            #weightInput {
-                max-width: 100%;
-            }
-
-            .weight-stats {
-                flex-direction: column;
-                gap: 4px;
-            }
-            
-            .checklist-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-                padding: 8px;
-            }
-            
-            .checkbox {
-                order: 3;
-                align-self: flex-end;
-                margin: 0;
-            }
-            
-            .time-badge {
-                order: 1;
-                width: 100%;
-                text-align: left;
-                margin: 0 0 3px 0;
-            }
-            
-            .task-text {
-                order: 2;
-                margin-bottom: 4px;
             }
         }
     </style>
@@ -1498,7 +1093,6 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // Firebase 설정
         const firebaseConfig = {
             apiKey: "AIzaSyAAXr7parhL6wQuUzy4MPvVhV6-J53wzcA",
             authDomain: "pastelmovie-cac7a.firebaseapp.com",
@@ -1510,19 +1104,17 @@
             measurementId: "G-LK2Q13294B"
         };
 
-        // 전역 변수
         let firebaseApp = null;
         let db = null;
         let firebaseInitialized = false;
         let currentDate = new Date();
         let memoLoaded = false;
         let weeklyChartCreated = false;
-        let dataLoadPromises = new Map(); // 중복 요청 방지
+        let dataLoadPromises = new Map();
 
         const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
         const dayNamesShort = ['일', '월', '화', '수', '목', '금', '토'];
 
-        // 스케줄 데이터
         const schedules = {
             weekday: [
                 { time: "07:30", task: "🌅 기상 + 물 한 컵", type: "sleep" },
@@ -1551,17 +1143,14 @@
             ]
         };
 
-        // Firebase 초기화 - 개선된 오류 처리
         async function initializeFirebase() {
             if (firebaseInitialized) return true;
             
             try {
                 console.log('🔄 Firebase 초기화 시도 중...');
-                
                 firebaseApp = initializeApp(firebaseConfig);
                 db = getFirestore(firebaseApp);
                 
-                // 연결 테스트 - 더 가벼운 방식
                 await Promise.race([
                     getDoc(doc(db, 'test', 'connection')),
                     new Promise((_, reject) => setTimeout(() => reject(new Error('타임아웃')), 5000))
@@ -1579,7 +1168,6 @@
             }
         }
 
-        // 유틸리티 함수들
         function getScheduleForDate(date) {
             const dayIndex = date.getDay();
             if (dayIndex === 0) return schedules.sunday;
@@ -1607,7 +1195,6 @@
             }
         }
 
-        // 시간 관련 함수들
         function parseTime(timeStr) {
             if (!timeStr.match(/\d{1,2}:\d{2}/)) return null;
             const [hour, minute] = timeStr.split(':').map(Number);
@@ -1653,7 +1240,6 @@
             return { current: currentTaskIndex, next: nextTaskIndex };
         }
 
-        // 체중 관리 함수들 - 중복 요청 방지
         async function saveWeightData(weight) {
             if (!firebaseInitialized) {
                 showNotification('Firebase 연결이 필요합니다', 'error');
@@ -1661,109 +1247,72 @@
             }
 
             const dateStr = currentDate.toISOString().split('T')[0];
-            const saveKey = `weight_save_${dateStr}`;
             
-            if (dataLoadPromises.has(saveKey)) {
-                return await dataLoadPromises.get(saveKey);
+            try {
+                await setDoc(doc(db, 'weightTracker', dateStr), {
+                    date: dateStr,
+                    weight: parseFloat(weight),
+                    timestamp: new Date().toISOString()
+                });
+
+                console.log('✅ 체중 데이터 저장 완료:', weight + 'kg');
+                return true;
+            } catch (error) {
+                console.error('❌ 체중 데이터 저장 실패:', error);
+                showNotification('체중 저장 실패: ' + error.message, 'error');
+                return false;
             }
-
-            const savePromise = (async () => {
-                try {
-                    await setDoc(doc(db, 'weightTracker', dateStr), {
-                        date: dateStr,
-                        weight: parseFloat(weight),
-                        timestamp: new Date().toISOString()
-                    });
-
-                    console.log('✅ 체중 데이터 저장 완료:', weight + 'kg');
-                    return true;
-                } catch (error) {
-                    console.error('❌ 체중 데이터 저장 실패:', error);
-                    showNotification('체중 저장 실패: ' + error.message, 'error');
-                    return false;
-                } finally {
-                    dataLoadPromises.delete(saveKey);
-                }
-            })();
-
-            dataLoadPromises.set(saveKey, savePromise);
-            return await savePromise;
         }
 
         async function loadWeightData() {
             if (!firebaseInitialized) return null;
 
             const dateStr = currentDate.toISOString().split('T')[0];
-            const loadKey = `weight_load_${dateStr}`;
             
-            if (dataLoadPromises.has(loadKey)) {
-                return await dataLoadPromises.get(loadKey);
-            }
-
-            const loadPromise = (async () => {
-                try {
-                    const docSnap = await getDoc(doc(db, 'weightTracker', dateStr));
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        return data.weight;
-                    }
-                    return null;
-                } catch (error) {
-                    console.error('❌ 체중 데이터 로드 실패:', error);
-                    return null;
-                } finally {
-                    dataLoadPromises.delete(loadKey);
+            try {
+                const docSnap = await getDoc(doc(db, 'weightTracker', dateStr));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    return data.weight;
                 }
-            })();
-
-            dataLoadPromises.set(loadKey, loadPromise);
-            return await loadPromise;
+                return null;
+            } catch (error) {
+                console.error('❌ 체중 데이터 로드 실패:', error);
+                return null;
+            }
         }
 
         async function loadWeeklyWeightData() {
             if (!firebaseInitialized) return [];
 
-            const loadKey = 'weekly_weight_data';
+            const weightData = [];
+            const today = new Date();
             
-            if (dataLoadPromises.has(loadKey)) {
-                return await dataLoadPromises.get(loadKey);
+            const promises = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                promises.push(
+                    getDoc(doc(db, 'weightTracker', dateStr))
+                        .then(docSnap => ({
+                            date: dateStr,
+                            weight: docSnap.exists() ? docSnap.data().weight : null,
+                            day: dayNamesShort[date.getDay()]
+                        }))
+                        .catch(() => ({
+                            date: dateStr,
+                            weight: null,
+                            day: dayNamesShort[date.getDay()]
+                        }))
+                );
             }
-
-            const loadPromise = (async () => {
-                const weightData = [];
-                const today = new Date();
-                
-                const promises = [];
-                for (let i = 6; i >= 0; i--) {
-                    const date = new Date(today);
-                    date.setDate(today.getDate() - i);
-                    const dateStr = date.toISOString().split('T')[0];
-                    
-                    promises.push(
-                        getDoc(doc(db, 'weightTracker', dateStr))
-                            .then(docSnap => ({
-                                date: dateStr,
-                                weight: docSnap.exists() ? docSnap.data().weight : null,
-                                day: dayNamesShort[date.getDay()]
-                            }))
-                            .catch(() => ({
-                                date: dateStr,
-                                weight: null,
-                                day: dayNamesShort[date.getDay()]
-                            }))
-                    );
-                }
-                
-                const results = await Promise.all(promises);
-                dataLoadPromises.delete(loadKey);
-                return results;
-            })();
-
-            dataLoadPromises.set(loadKey, loadPromise);
-            return await loadPromise;
+            
+            const results = await Promise.all(promises);
+            return results;
         }
 
-        // 체중 그래프 생성 - 최적화
         function createWeightChart(weightData) {
             const chartContainer = document.getElementById('weightChart');
             if (!chartContainer) return;
@@ -1771,30 +1320,17 @@
             chartContainer.innerHTML = '';
 
             if (!weightData || weightData.length === 0) {
-                chartContainer.innerHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;">
-                        <div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div>
-                        <div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div>
-                        <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div>
-                    </div>
-                `;
+                chartContainer.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;"><div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div><div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div><div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div></div>';
                 return;
             }
 
             const validData = weightData.filter(d => d.weight !== null);
             
             if (validData.length === 0) {
-                chartContainer.innerHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;">
-                        <div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div>
-                        <div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div>
-                        <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div>
-                    </div>
-                `;
+                chartContainer.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;"><div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div><div style="font-size: 1rem; font-weight: 600;">아직 체중 데이터가 없습니다</div><div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중을 기록하면 변화 추이를 확인할 수 있습니다</div></div>';
                 return;
             }
 
-            // 차트 생성 - DocumentFragment 사용으로 성능 개선
             const fragment = document.createDocumentFragment();
             const barChartContainer = document.createElement('div');
             barChartContainer.className = 'weight-bar-chart';
@@ -1806,18 +1342,18 @@
             
             let chartMinWeight, chartMaxWeight, weightRange;
             
-            if (range <= 0.5) {
+            if (range <= 0.3) {
                 const avgWeight = weights.reduce((a, b) => a + b) / weights.length;
-                chartMinWeight = avgWeight - 2;
-                chartMaxWeight = avgWeight + 2;
-                weightRange = 4;
-            } else if (range <= 2) {
+                chartMinWeight = avgWeight - 1.5;
+                chartMaxWeight = avgWeight + 1.5;
+                weightRange = 3;
+            } else if (range <= 1) {
                 const padding = range * 0.5;
                 chartMinWeight = minWeight - padding;
                 chartMaxWeight = maxWeight + padding;
                 weightRange = chartMaxWeight - chartMinWeight;
             } else {
-                const padding = range * 0.2;
+                const padding = range * 0.3;
                 chartMinWeight = minWeight - padding;
                 chartMaxWeight = maxWeight + padding;
                 weightRange = chartMaxWeight - chartMinWeight;
@@ -1826,157 +1362,151 @@
             const today = new Date().toISOString().split('T')[0];
             const avgWeight = weights.reduce((a, b) => a + b) / weights.length;
 
+            console.log('📊 체중 범위:', { 
+                실제범위: range.toFixed(2), 
+                차트최소: chartMinWeight.toFixed(1), 
+                차트최대: chartMaxWeight.toFixed(1),
+                차트범위: weightRange.toFixed(1) 
+            });
+
             validData.forEach((item, index) => {
                 const barContainer = document.createElement('div');
                 barContainer.className = 'weight-bar-container';
 
                 let heightPercent;
                 if (validData.length === 1) {
-                    heightPercent = Math.max(10, Math.min(90, heightPercent));
+                    heightPercent = 50;
+                } else {
+                    const relativePosition = (item.weight - chartMinWeight) / weightRange;
+                    
+                    if (relativePosition <= 0.15) {
+                        heightPercent = 15 + (relativePosition / 0.15) * 15;
+                    } else if (relativePosition <= 0.35) {
+                        heightPercent = 30 + ((relativePosition - 0.15) / 0.2) * 20;
+                    } else if (relativePosition <= 0.65) {
+                        heightPercent = 50 + ((relativePosition - 0.35) / 0.3) * 20;
+                    } else if (relativePosition <= 0.85) {
+                        heightPercent = 70 + ((relativePosition - 0.65) / 0.2) * 15;
+                    } else {
+                        heightPercent = 85 + ((relativePosition - 0.85) / 0.15) * 10;
+                    }
+                    
+                    heightPercent = Math.max(15, Math.min(95, heightPercent));
                 }
 
                 const bar = document.createElement('div');
                 bar.className = 'weight-bar';
                 const isToday = item.date === today;
                 
-                let bgColor;
+                bar.style.height = heightPercent + '%';
+                
                 if (isToday) {
-                    bgColor = 'linear-gradient(180deg, #10b981, #059669)';
+                    bar.classList.add('today');
                 } else if (validData.length > 1) {
-                    if (item.weight > avgWeight + 0.2) {
-                        bgColor = 'linear-gradient(180deg, #f59e0b, #d97706)';
-                    } else if (item.weight < avgWeight - 0.2) {
-                        bgColor = 'linear-gradient(180deg, #3b82f6, #2563eb)';
+                    let weightChangeFromPrev = 0;
+                    if (index > 0) {
+                        weightChangeFromPrev = item.weight - validData[index - 1].weight;
+                    }
+                    
+                    const diffFromAvg = item.weight - avgWeight;
+                    
+                    if (Math.abs(diffFromAvg) <= 0.15 && Math.abs(weightChangeFromPrev) <= 0.1) {
+                        bar.classList.add('stable');
+                    } else if (diffFromAvg > 0.5 || weightChangeFromPrev > 0.3) {
+                        bar.classList.add('high-increase');
+                    } else if (diffFromAvg > 0.2 || weightChangeFromPrev > 0.1) {
+                        bar.classList.add('medium-increase');
+                    } else if (diffFromAvg < -0.5 || weightChangeFromPrev < -0.3) {
+                        bar.classList.add('high-decrease');
+                    } else if (diffFromAvg < -0.2 || weightChangeFromPrev < -0.1) {
+                        bar.classList.add('medium-decrease');
                     } else {
-                        bgColor = 'linear-gradient(180deg, #6366f1, #4f46e5)';
+                        bar.classList.add('stable');
                     }
                 } else {
-                    bgColor = 'linear-gradient(180deg, #6366f1, #4f46e5)';
+                    bar.classList.add('stable');
                 }
-                
-                bar.style.cssText = `
-                    width: 100%;
-                    height: ${heightPercent}%;
-                    background: ${bgColor};
-                    border-radius: 8px 8px 4px 4px;
-                    position: relative;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-                    cursor: pointer;
-                    border: 2px solid transparent;
-                `;
 
-                // 호버 효과
                 bar.addEventListener('mouseenter', () => {
                     bar.style.transform = 'translateY(-4px)';
-                    bar.style.boxShadow = '0 8px 20px rgba(99, 102, 241, 0.4)';
                     bar.style.borderColor = '#ffffff';
                 });
 
                 bar.addEventListener('mouseleave', () => {
                     bar.style.transform = 'translateY(0)';
-                    bar.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.3)';
                     bar.style.borderColor = 'transparent';
                 });
 
-                // 체중 값 라벨
                 const valueLabel = document.createElement('div');
                 valueLabel.className = 'weight-value-label';
                 valueLabel.textContent = `${item.weight.toFixed(1)}kg`;
 
-                // 개선된 변화량 표시 - 더 명확하고 정확한 정보
                 if (index > 0) {
                     const prevWeight = validData[index - 1].weight;
                     const change = item.weight - prevWeight;
                     
-                    if (Math.abs(change) >= 0.05) { // 0.05kg 이상 변화만 표시
+                    if (Math.abs(change) >= 0.05) {
                         const changeIndicator = document.createElement('div');
+                        changeIndicator.className = 'change-indicator';
                         
-                        let changeColor, changeSymbol, changeText;
+                        let changeSymbol, changeText, changeClass;
                         if (change > 0.3) {
-                            changeColor = '#ef4444'; // 큰 증가: 빨강
+                            changeClass = 'big-increase';
                             changeSymbol = '⬆⬆';
                             changeText = `+${change.toFixed(1)}`;
                         } else if (change > 0.1) {
-                            changeColor = '#f59e0b'; // 작은 증가: 주황
+                            changeClass = 'small-increase';
                             changeSymbol = '⬆';
                             changeText = `+${change.toFixed(1)}`;
                         } else if (change < -0.3) {
-                            changeColor = '#10b981'; // 큰 감소: 초록
+                            changeClass = 'big-decrease';
                             changeSymbol = '⬇⬇';
                             changeText = `${change.toFixed(1)}`;
                         } else if (change < -0.1) {
-                            changeColor = '#059669'; // 작은 감소: 진한 초록
+                            changeClass = 'small-decrease';
                             changeSymbol = '⬇';
                             changeText = `${change.toFixed(1)}`;
                         } else {
-                            changeColor = '#6b7280'; // 미세한 변화: 회색
+                            changeClass = 'minimal';
                             changeSymbol = '→';
                             changeText = `${change >= 0 ? '+' : ''}${change.toFixed(1)}`;
                         }
                         
-                        changeIndicator.style.cssText = `
-                            position: absolute;
-                            top: -8px;
-                            right: -6px;
-                            background: ${changeColor};
-                            color: white;
-                            padding: 2px 5px;
-                            border-radius: 6px;
-                            font-size: 9px;
-                            font-weight: 700;
-                            line-height: 1;
-                            white-space: nowrap;
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                        `;
+                        changeIndicator.classList.add(changeClass);
                         changeIndicator.textContent = `${changeSymbol} ${changeText}kg`;
-                        
-                        // 호버 시 상세 정보
                         changeIndicator.title = `이전 대비 ${change > 0 ? '증가' : '감소'}: ${Math.abs(change).toFixed(1)}kg`;
                         
                         bar.appendChild(changeIndicator);
                     }
                 }
 
-                // 평균 대비 표시기 추가
                 const diffFromAvg = item.weight - avgWeight;
                 if (validData.length > 2 && Math.abs(diffFromAvg) > 0.2) {
                     const avgIndicator = document.createElement('div');
+                    avgIndicator.className = 'avg-indicator';
                     
-                    let avgColor, avgText;
+                    let avgText, avgClass;
                     if (diffFromAvg > 0.5) {
-                        avgColor = '#ef4444';
+                        avgClass = 'much-higher';
                         avgText = '높음';
                     } else if (diffFromAvg > 0.2) {
-                        avgColor = '#f59e0b';
+                        avgClass = 'higher';
                         avgText = '↑';
                     } else if (diffFromAvg < -0.5) {
-                        avgColor = '#10b981';
+                        avgClass = 'much-lower';
                         avgText = '낮음';
                     } else {
-                        avgColor = '#059669';
+                        avgClass = 'lower';
                         avgText = '↓';
                     }
                     
-                    avgIndicator.style.cssText = `
-                        position: absolute;
-                        bottom: -8px;
-                        left: -6px;
-                        background: ${avgColor};
-                        color: white;
-                        padding: 1px 4px;
-                        border-radius: 4px;
-                        font-size: 8px;
-                        font-weight: 600;
-                        line-height: 1;
-                    `;
+                    avgIndicator.classList.add(avgClass);
                     avgIndicator.textContent = avgText;
                     avgIndicator.title = `평균 대비: ${diffFromAvg > 0 ? '+' : ''}${diffFromAvg.toFixed(1)}kg`;
                     
                     bar.appendChild(avgIndicator);
                 }
 
-                // 날짜 라벨
                 const dayLabel = document.createElement('div');
                 dayLabel.className = `weight-day-label ${isToday ? 'today' : ''}`;
                 dayLabel.textContent = item.day;
@@ -2101,7 +1631,6 @@
             }
         }
 
-        // 주간 달성률 그래프 - 최적화
         async function createWeeklyChart() {
             if (weeklyChartCreated) return;
             
@@ -2117,7 +1646,6 @@
 
             console.log('📊 주간차트 생성 시작...');
 
-            // DocumentFragment로 성능 개선
             const fragment = document.createDocumentFragment();
             
             for (let i = 0; i < 7; i++) {
@@ -2156,88 +1684,73 @@
             await loadWeeklyData();
         }
 
-        // 주간 데이터 로딩 - 배치 요청으로 최적화
         async function loadWeeklyData() {
             if (!firebaseInitialized) return;
 
-            const loadKey = 'weekly_progress_data';
-            
-            if (dataLoadPromises.has(loadKey)) {
-                return await dataLoadPromises.get(loadKey);
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+
+            const weeklyChart = document.getElementById('weeklyChart');
+            if (!weeklyChart) return;
+
+            const dayBars = weeklyChart.children;
+            let totalPercentage = 0;
+            let validDays = 0;
+
+            console.log('📊 주간 데이터 로딩 시작...');
+
+            const promises = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                promises.push(
+                    getDoc(doc(db, 'healthTracker', dateStr))
+                        .then(docSnap => ({ index: i, date, dateStr, docSnap }))
+                        .catch(error => ({ index: i, date, dateStr, error }))
+                );
             }
 
-            const loadPromise = (async () => {
-                const today = new Date();
-                const startOfWeek = new Date(today);
-                startOfWeek.setDate(today.getDate() - today.getDay());
+            const results = await Promise.all(promises);
+            
+            results.forEach(({ index, date, dateStr, docSnap, error }) => {
+                let dayPercentage = 0;
 
-                const weeklyChart = document.getElementById('weeklyChart');
-                if (!weeklyChart) return;
+                if (!error && docSnap && docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.schedule && Array.isArray(data.schedule)) {
+                        const completedTasks = data.schedule.filter(task => task.completed).length;
+                        dayPercentage = Math.round((completedTasks / data.schedule.length) * 100);
+                    }
+                }
 
-                const dayBars = weeklyChart.children;
-                let totalPercentage = 0;
-                let validDays = 0;
-
-                console.log('📊 주간 데이터 로딩 시작...');
-
-                // 병렬 요청으로 성능 개선
-                const promises = [];
-                for (let i = 0; i < 7; i++) {
-                    const date = new Date(startOfWeek);
-                    date.setDate(startOfWeek.getDate() + i);
-                    const dateStr = date.toISOString().split('T')[0];
+                if (dayBars[index]) {
+                    const barFill = dayBars[index].querySelector('.bar-fill');
+                    const percentage = dayBars[index].querySelector('.bar-percentage');
                     
-                    promises.push(
-                        getDoc(doc(db, 'healthTracker', dateStr))
-                            .then(docSnap => ({ index: i, date, dateStr, docSnap }))
-                            .catch(error => ({ index: i, date, dateStr, error }))
-                    );
+                    if (barFill && percentage) {
+                        barFill.style.height = `${dayPercentage}%`;
+                        percentage.textContent = `${dayPercentage}%`;
+                    }
                 }
 
-                const results = await Promise.all(promises);
-                
-                results.forEach(({ index, date, dateStr, docSnap, error }) => {
-                    let dayPercentage = 0;
-
-                    if (!error && docSnap && docSnap.exists()) {
-                        const data = docSnap.data();
-                        if (data.schedule && Array.isArray(data.schedule)) {
-                            const completedTasks = data.schedule.filter(task => task.completed).length;
-                            dayPercentage = Math.round((completedTasks / data.schedule.length) * 100);
-                        }
-                    }
-
-                    if (dayBars[index]) {
-                        const barFill = dayBars[index].querySelector('.bar-fill');
-                        const percentage = dayBars[index].querySelector('.bar-percentage');
-                        
-                        if (barFill && percentage) {
-                            barFill.style.height = `${dayPercentage}%`;
-                            percentage.textContent = `${dayPercentage}%`;
-                        }
-                    }
-
-                    if (date <= today) {
-                        totalPercentage += dayPercentage;
-                        validDays++;
-                    }
-                });
-
-                const weeklyAverage = validDays > 0 ? Math.round(totalPercentage / validDays) : 0;
-                const weeklyAverageEl = document.getElementById('weeklyAverage');
-                if (weeklyAverageEl) {
-                    weeklyAverageEl.textContent = `평균 ${weeklyAverage}%`;
+                if (date <= today) {
+                    totalPercentage += dayPercentage;
+                    validDays++;
                 }
-                
-                console.log(`📊 주간 평균: ${weeklyAverage}% (${validDays}일 기준)`);
-                dataLoadPromises.delete(loadKey);
-            })();
+            });
 
-            dataLoadPromises.set(loadKey, loadPromise);
-            return await loadPromise;
+            const weeklyAverage = validDays > 0 ? Math.round(totalPercentage / validDays) : 0;
+            const weeklyAverageEl = document.getElementById('weeklyAverage');
+            if (weeklyAverageEl) {
+                weeklyAverageEl.textContent = `평균 ${weeklyAverage}%`;
+            }
+            
+            console.log(`📊 주간 평균: ${weeklyAverage}% (${validDays}일 기준)`);
         }
 
-        // UI 업데이트 함수들
         function updateCurrentTimeDisplay() {
             try {
                 const now = new Date();
@@ -2299,7 +1812,6 @@
                 const checklistItems = document.getElementById('checklistItems');
                 if (!checklistItems) return;
                 
-                // DocumentFragment로 성능 개선
                 const fragment = document.createDocumentFragment();
                 
                 schedule.forEach((item, index) => {
@@ -2396,7 +1908,6 @@
             const sleepTotal = schedule.filter(item => item.type === 'sleep').length;
             const totalProgress = Math.round((totalCompleted / schedule.length) * 100);
             
-            // 통계 업데이트
             const elements = {
                 exerciseCount: document.getElementById('exerciseCount'),
                 exerciseTotal: document.getElementById('exerciseTotal'),
@@ -2426,7 +1937,6 @@
             if (elements.sleepProgress) elements.sleepProgress.style.width = `${(sleepCount / sleepTotal) * 100}%`;
             if (elements.totalProgressBar) elements.totalProgressBar.style.width = `${totalProgress}%`;
             
-            // 완료 축하
             const celebration = document.getElementById('completionCelebration');
             if (celebration) {
                 if (totalCompleted === schedule.length && schedule.length > 0) {
@@ -2517,100 +2027,75 @@
             }
         }
 
-        // Firebase 저장 함수들 - 중복 요청 방지
         async function saveChecklistData() {
             if (!firebaseInitialized) return;
 
             const dateStr = currentDate.toISOString().split('T')[0];
-            const saveKey = `checklist_save_${dateStr}`;
-            
-            if (dataLoadPromises.has(saveKey)) return;
-
             updateSaveIndicator('saving');
 
-            const savePromise = (async () => {
-                try {
-                    const schedule = getScheduleForDate(currentDate);
-                    
-                    const dailyData = schedule.map((item, index) => {
-                        const checkbox = document.getElementById(`checkbox-${index}`);
-                        return {
-                            time: item.time,
-                            task: item.task,
-                            type: item.type,
-                            completed: checkbox ? checkbox.checked : false
-                        };
-                    });
+            try {
+                const schedule = getScheduleForDate(currentDate);
+                
+                const dailyData = schedule.map((item, index) => {
+                    const checkbox = document.getElementById(`checkbox-${index}`);
+                    return {
+                        time: item.time,
+                        task: item.task,
+                        type: item.type,
+                        completed: checkbox ? checkbox.checked : false
+                    };
+                });
 
-                    await setDoc(doc(db, 'healthTracker', dateStr), {
-                        date: dateStr,
-                        dayOfWeek: dayNames[currentDate.getDay()],
-                        schedule: dailyData,
-                        lastUpdated: new Date().toISOString()
-                    });
+                await setDoc(doc(db, 'healthTracker', dateStr), {
+                    date: dateStr,
+                    dayOfWeek: dayNames[currentDate.getDay()],
+                    schedule: dailyData,
+                    lastUpdated: new Date().toISOString()
+                });
 
-                    updateSaveIndicator('saved');
-                    console.log('✅ 체크리스트 저장 완료:', dateStr);
+                updateSaveIndicator('saved');
+                console.log('✅ 체크리스트 저장 완료:', dateStr);
 
-                } catch (error) {
-                    console.error('❌ 체크리스트 저장 실패:', error);
-                    updateSaveIndicator('error');
-                    showNotification('저장 실패: ' + error.message, 'error');
-                } finally {
-                    dataLoadPromises.delete(saveKey);
-                }
-            })();
-
-            dataLoadPromises.set(saveKey, savePromise);
-            return await savePromise;
+            } catch (error) {
+                console.error('❌ 체크리스트 저장 실패:', error);
+                updateSaveIndicator('error');
+                showNotification('저장 실패: ' + error.message, 'error');
+            }
         }
 
         async function loadChecklistData() {
             if (!firebaseInitialized) return;
 
             const dateStr = currentDate.toISOString().split('T')[0];
-            const loadKey = `checklist_load_${dateStr}`;
-            
-            if (dataLoadPromises.has(loadKey)) {
-                return await dataLoadPromises.get(loadKey);
-            }
 
-            const loadPromise = (async () => {
-                try {
-                    console.log(`📂 체크리스트 로딩: ${dateStr}`);
+            try {
+                console.log(`📂 체크리스트 로딩: ${dateStr}`);
+                
+                const docSnap = await getDoc(doc(db, 'healthTracker', dateStr));
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const schedule = data.schedule;
                     
-                    const docSnap = await getDoc(doc(db, 'healthTracker', dateStr));
+                    await new Promise(resolve => setTimeout(resolve, 100));
 
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        const schedule = data.schedule;
-                        
-                        await new Promise(resolve => setTimeout(resolve, 100));
-
-                        schedule.forEach((item, index) => {
-                            const checkbox = document.getElementById(`checkbox-${index}`);
-                            if (checkbox) {
-                                checkbox.checked = item.completed;
-                            }
-                        });
-                        
-                        updateStats();
-                        console.log('📂 체크리스트 로드 완료:', dateStr);
-                    } else {
-                        console.log(`📭 데이터 없음: ${dateStr}`);
-                    }
-                } catch (error) {
-                    console.error('❌ 체크리스트 로드 실패:', error);
-                } finally {
-                    dataLoadPromises.delete(loadKey);
+                    schedule.forEach((item, index) => {
+                        const checkbox = document.getElementById(`checkbox-${index}`);
+                        if (checkbox) {
+                            checkbox.checked = item.completed;
+                        }
+                    });
+                    
+                    updateStats();
+                    console.log('📂 체크리스트 로드 완료:', dateStr);
+                } else {
+                    console.log(`📭 데이터 없음: ${dateStr}`);
                 }
-            })();
-
-            dataLoadPromises.set(loadKey, loadPromise);
-            return await loadPromise;
+            } catch (error) {
+                console.error('❌ 체크리스트 로드 실패:', error);
+            }
         }
 
-        // 영구 메모 관리 - 최적화
         async function savePermanentMemo() {
             if (!firebaseInitialized) return;
 
@@ -2714,7 +2199,6 @@
             }
         }
 
-        // 이벤트 리스너 설정
         function setupEventListeners() {
             const prevDayBtn = document.getElementById('prevDayBtn');
             const nextDayBtn = document.getElementById('nextDayBtn');
@@ -2739,14 +2223,12 @@
             setupWeightEvents();
         }
 
-        // UI 초기화
         function initializeUI() {
             setupEventListeners();
             updateCurrentTimeDisplay();
             generateChecklist();
         }
 
-        // 앱 초기화 - 최적화
         async function startApp() {
             console.log('🚀 건강관리 트래커 시작!');
             
@@ -2801,7 +2283,6 @@
                 
                 console.log('📊 데이터 로딩 시작...');
                 
-                // 병렬 로딩으로 성능 개선
                 await Promise.all([
                     loadChecklistData(),
                     loadPermanentMemo(),
@@ -2809,7 +2290,6 @@
                     createWeeklyChart()
                 ]);
                 
-                // 최종 UI 업데이트
                 setTimeout(() => {
                     updateStats();
                     updateCurrentTimeDisplay();
@@ -2817,7 +2297,7 @@
                     console.log('✅ 모든 데이터 로딩 완료');
                 }, 200);
                 
-                showNotification('Firebase 연결 완료! 모든 데이터가 클라우드에 저장됩니다 🔥', 'success');
+                showNotification('Firebase 연결 완료! 모든 데이터가 클라우드에 저장됩니다', 'success');
                 console.log('✅ 앱 초기화 완료');
                 
             } catch (error) {
@@ -2826,7 +2306,6 @@
             }
         }
 
-        // 시간 업데이트 타이머
         function startTimeUpdater() {
             updateCurrentTimeDisplay();
             updateTaskHighlight();
@@ -2841,15 +2320,10 @@
             }, 60000);
         }
 
-        // 앱 시작
         document.addEventListener('DOMContentLoaded', async () => {
             await startApp();
             startTimeUpdater();
         });
     </script>
 </body>
-</html> 50;
-                } else {
-                    const relativePosition = (item.weight - chartMinWeight) / weightRange;
-                    heightPercent = 15 + (relativePosition * 70);
-                    heightPercent =
+</html>)
