@@ -207,7 +207,7 @@
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
         }
 
-        /* 체중 그래프 - 완전히 새로 작성 */
+        /* 체중 그래프 */
         .weight-chart-section {
             background: var(--surface);
             border-radius: 15px;
@@ -264,57 +264,53 @@
             color: var(--text-secondary);
         }
 
-        /* 체중 차트 컨테이너 - 여백 최소화 */
-.weight-chart-wrapper {
-    position: relative;
-    height: 300px;
-    background: linear-gradient(145deg, #f8fafc, #f1f5f9);
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    overflow: visible;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .weight-chart-wrapper {
+            position: relative;
+            height: 300px;
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: visible;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-/* 막대 차트 영역 - 패딩 완전 제거 */
-.weight-bars-container {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-evenly;
-    height: 180px;
-    margin: 0;
-    padding: 0;
-    border-bottom: 2px solid #e2e8f0;
-    width: 100%;
-}
+        .weight-bars-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-evenly;
+            height: 180px;
+            margin: 0;
+            padding: 0;
+            border-bottom: 2px solid #e2e8f0;
+            width: 100%;
+        }
 
-/* 개별 막대 */
-.weight-bar-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    width: 35px;
-    height: 100%;
-    justify-content: flex-end;  /* 이 줄 추가 */
-}
+        .weight-bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            width: 35px;
+            height: 100%;
+            justify-content: flex-end;
+        }
 
-.weight-bar-main {
-    width: 100%;
-    border-radius: 6px 6px 2px 2px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    margin-bottom: 0;  /* 5px에서 0으로 변경 */
-}
+        .weight-bar-main {
+            width: 100%;
+            border-radius: 6px 6px 2px 2px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 0;
+        }
 
         .weight-bar-main:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 16px rgba(0,0,0,0.15);
         }
 
-        /* 막대 색상 클래스 */
         .weight-bar-main.today {
             background: linear-gradient(180deg, #10b981, #059669);
             box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
@@ -345,7 +341,6 @@
             box-shadow: 0 3px 10px rgba(59, 130, 246, 0.3);
         }
 
-        /* 체중 값 라벨 */
         .weight-value-display {
             position: absolute;
             top: -25px;
@@ -361,7 +356,6 @@
             z-index: 10;
         }
 
-        /* 요일 라벨 */
         .weight-day-display {
             margin-top: 8px;
             font-size: 11px;
@@ -374,7 +368,6 @@
             font-weight: 700;
         }
 
-        /* 변화 표시기 */
         .weight-change-badge {
             position: absolute;
             top: -8px;
@@ -630,6 +623,7 @@
             transition: all 0.3s;
             cursor: pointer;
             position: relative;
+            flex-direction: column;
         }
         
         .checklist-item:hover {
@@ -700,6 +694,107 @@
             flex: 1;
             font-size: 0.9rem;
             font-weight: 500;
+        }
+
+        .exercise-expand-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            transition: all 0.2s;
+            color: var(--primary);
+        }
+
+        .exercise-expand-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .exercise-expand-btn.expanded {
+            transform: rotate(90deg);
+        }
+
+        .exercise-details {
+            display: none;
+            margin-top: 12px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            width: 100%;
+        }
+
+        .exercise-details.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; height: 0; }
+            to { opacity: 1; height: auto; }
+        }
+
+        .exercise-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .exercise-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .exercise-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .exercise-item.completed {
+            background: #f0fdf4;
+            border-color: var(--success);
+        }
+
+        .exercise-checkbox {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: var(--success);
+        }
+
+        .exercise-name {
+            flex: 1;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .exercise-details-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .exercise-progress {
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .exercise-progress-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
         }
 
         .weight-input-section {
@@ -951,7 +1046,7 @@
             </div>
         </div>
 
-        <!-- 체중 그래프 섹션 - 완전히 새로 작성 -->
+        <!-- 체중 그래프 섹션 -->
         <div class="weight-chart-section">
             <div class="weight-chart-header">
                 <div class="weight-chart-title">📈 최근 7일 체중 변화</div>
@@ -1085,19 +1180,19 @@
         const schedules = {
             weekday: [
                 { time: "07:30", task: "🌅 기상 + 물 한 컵", type: "sleep" },
-                { time: "08:00-10:00", task: "🏃‍♂️ 아침 운동 (2시간)", type: "exercise" },
+                { time: "08:00-10:00", task: "🏃‍♂️ 아침 운동 (2시간)", type: "exercise", hasDetails: true },
                 { time: "10:00-11:00", task: "🍽️ 아침식사 + 샤워", type: "meal" },
                 { time: "13:00-14:00", task: "🍽️ 점심식사", type: "meal" },
                 { time: "18:00-19:00", task: "🍽️ 저녁식사", type: "meal" },
-                { time: "19:30-21:30", task: "💪 저녁 운동 (2시간)", type: "exercise" },
+                { time: "19:30-21:30", task: "💪 저녁 운동 (2시간)", type: "exercise", hasDetails: true },
                 { time: "21:30", task: "🥩 닭가슴살/단백질", type: "meal" },
                 { time: "23:30", task: "😴 취침", type: "sleep" }
             ],
             saturday: [
                 { time: "07:30", task: "🌅 기상", type: "sleep" },
-                { time: "10:00-12:00", task: "🏃‍♂️ 아침 운동 (2시간)", type: "exercise" },
+                { time: "10:00-12:00", task: "🏃‍♂️ 아침 운동 (2시간)", type: "exercise", hasDetails: true },
                 { time: "12:00-13:00", task: "🍽️ 아침 겸 점심 식사", type: "meal" },
-                { time: "16:00-18:00", task: "💪 저녁 운동 (2시간)", type: "exercise" },
+                { time: "16:00-18:00", task: "💪 저녁 운동 (2시간)", type: "exercise", hasDetails: true },
                 { time: "18:00-19:00", task: "🍽️ 저녁식사", type: "meal" },
                 { time: "23:30", task: "😴 취침", type: "sleep" }
             ],
@@ -1107,6 +1202,27 @@
                 { time: "13:00", task: "🍽️ 점심식사", type: "meal" },
                 { time: "18:00", task: "🍽️ 저녁식사", type: "meal" },
                 { time: "23:30", task: "😴 취침", type: "sleep" }
+            ]
+        };
+
+        const exerciseDetails = {
+            "🏃‍♂️ 아침 운동 (2시간)": [
+                { name: "레그컬 레그익스텐션", details: "20kg / 20회 / 3세트" },
+                { name: "이너 아웃 thigh", details: "20kg / 20회 / 3세트" },
+                { name: "바벨스커트 바벨", details: "20kg / 20회 / 3세트" },
+                { name: "바벨스커트 바벨", details: "40kg / 10회 / 1세트" },
+                { name: "레그프레스", details: "40kg / 20회 / 3세트" },
+                { name: "핵프레스", details: "40kg / 20회 / 3세트" },
+                { name: "러닝머신", details: "경사4 / 속도4 / 50분" }
+            ],
+            "💪 저녁 운동 (2시간)": [
+                { name: "레그컬 레그익스텐션", details: "20kg / 20회 / 3세트" },
+                { name: "이너 아웃 thigh", details: "20kg / 20회 / 3세트" },
+                { name: "바벨스커트 바벨", details: "20kg / 20회 / 3세트" },
+                { name: "바벨스커트 바벨", details: "40kg / 10회 / 1세트" },
+                { name: "레그프레스", details: "40kg / 20회 / 3세트" },
+                { name: "핵프레스", details: "40kg / 20회 / 3세트" },
+                { name: "러닝머신", details: "경사4 / 속도4 / 50분" }
             ]
         };
 
@@ -1280,7 +1396,6 @@
             return results;
         }
 
-        // 완전히 새로 작성한 체중 차트 생성 함수
         function createWeightChart(weightData) {
             const chartWrapper = document.getElementById('weightChartWrapper');
             if (!chartWrapper) return;
@@ -1316,7 +1431,6 @@
             const maxWeight = Math.max(...weights);
             const range = maxWeight - minWeight;
             
-            // 차트 범위 계산
             let chartMinWeight, chartMaxWeight, weightRange;
             
             if (range <= 0.3) {
@@ -1339,33 +1453,28 @@
             const today = new Date().toISOString().split('T')[0];
             const avgWeight = weights.reduce((a, b) => a + b) / weights.length;
 
-            // 막대 차트 컨테이너 생성
             const barsContainer = document.createElement('div');
             barsContainer.className = 'weight-bars-container';
 
             validData.forEach((item, index) => {
-                // 막대 높이 계산 - 50%~95% 범위에서 극명한 차이
                 let heightPercent;
                 if (validData.length === 1) {
                     heightPercent = 75;
                 } else {
                     const relativePosition = (item.weight - chartMinWeight) / weightRange;
-                    heightPercent = 50 + (relativePosition * 45); // 50%~95% 범위
+                    heightPercent = 50 + (relativePosition * 45);
                     heightPercent = Math.max(50, Math.min(95, heightPercent));
                 }
 
-                // 막대 아이템 생성
                 const barItem = document.createElement('div');
                 barItem.className = 'weight-bar-item';
 
-                // 메인 막대
                 const barMain = document.createElement('div');
                 barMain.className = 'weight-bar-main';
                 barMain.style.height = heightPercent + '%';
 
                 const isToday = item.date === today;
                 
-                // 색상 클래스 설정
                 if (isToday) {
                     barMain.classList.add('today');
                 } else if (validData.length > 1) {
@@ -1393,13 +1502,11 @@
                     barMain.classList.add('stable');
                 }
 
-                // 체중 값 라벨
                 const valueLabel = document.createElement('div');
                 valueLabel.className = 'weight-value-display';
                 valueLabel.textContent = `${item.weight.toFixed(1)}kg`;
                 barMain.appendChild(valueLabel);
 
-                // 변화량 표시
                 if (index > 0) {
                     const prevWeight = validData[index - 1].weight;
                     const change = item.weight - prevWeight;
@@ -1433,7 +1540,6 @@
                     }
                 }
 
-                // 요일 라벨
                 const dayLabel = document.createElement('div');
                 dayLabel.className = `weight-day-display ${isToday ? 'today' : ''}`;
                 dayLabel.textContent = item.day;
@@ -1568,687 +1674,3 @@
             const today = new Date();
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - today.getDay());
-
-            console.log('📊 주간차트 생성 시작...');
-
-            const fragment = document.createDocumentFragment();
-            
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(startOfWeek);
-                date.setDate(startOfWeek.getDate() + i);
-                
-                const dayBar = document.createElement('div');
-                dayBar.className = `day-bar ${date.toDateString() === today.toDateString() ? 'today' : ''}`;
-                dayBar.setAttribute('data-day-index', i);
-
-                const barContainer = document.createElement('div');
-                barContainer.className = 'bar-container';
-
-                const barFill = document.createElement('div');
-                barFill.className = 'bar-fill';
-                barFill.style.height = '0%';
-
-                const percentage = document.createElement('div');
-                percentage.className = 'bar-percentage';
-                percentage.textContent = '0%';
-
-                const dayLabel = document.createElement('div');
-                dayLabel.className = 'day-label';
-                dayLabel.textContent = dayNamesShort[i];
-
-                barContainer.appendChild(barFill);
-                barContainer.appendChild(percentage);
-                dayBar.appendChild(barContainer);
-                dayBar.appendChild(dayLabel);
-                fragment.appendChild(dayBar);
-            }
-
-            weeklyChart.appendChild(fragment);
-            console.log('📊 주간차트 생성 완료');
-            
-            await loadWeeklyData();
-        }
-
-        async function loadWeeklyData() {
-            if (!firebaseInitialized) return;
-
-            const today = new Date();
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - today.getDay());
-
-            const weeklyChart = document.getElementById('weeklyChart');
-            if (!weeklyChart) return;
-
-            const dayBars = weeklyChart.children;
-            let totalPercentage = 0;
-            let validDays = 0;
-
-            console.log('📊 주간 데이터 로딩 시작...');
-
-            const promises = [];
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(startOfWeek);
-                date.setDate(startOfWeek.getDate() + i);
-                const dateStr = date.toISOString().split('T')[0];
-                
-                promises.push(
-                    getDoc(doc(db, 'healthTracker', dateStr))
-                        .then(docSnap => ({ index: i, date, dateStr, docSnap }))
-                        .catch(error => ({ index: i, date, dateStr, error }))
-                );
-            }
-
-            const results = await Promise.all(promises);
-            
-            results.forEach(({ index, date, dateStr, docSnap, error }) => {
-                let dayPercentage = 0;
-
-                if (!error && docSnap && docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.schedule && Array.isArray(data.schedule)) {
-                        const completedTasks = data.schedule.filter(task => task.completed).length;
-                        dayPercentage = Math.round((completedTasks / data.schedule.length) * 100);
-                    }
-                }
-
-                if (dayBars[index]) {
-                    const barFill = dayBars[index].querySelector('.bar-fill');
-                    const percentage = dayBars[index].querySelector('.bar-percentage');
-                    
-                    if (barFill && percentage) {
-                        barFill.style.height = `${dayPercentage}%`;
-                        percentage.textContent = `${dayPercentage}%`;
-                    }
-                }
-
-                if (date <= today) {
-                    totalPercentage += dayPercentage;
-                    validDays++;
-                }
-            });
-
-            const weeklyAverage = validDays > 0 ? Math.round(totalPercentage / validDays) : 0;
-            const weeklyAverageEl = document.getElementById('weeklyAverage');
-            if (weeklyAverageEl) {
-                weeklyAverageEl.textContent = `평균 ${weeklyAverage}%`;
-            }
-            
-            console.log(`📊 주간 평균: ${weeklyAverage}% (${validDays}일 기준)`);
-        }
-
-        function updateCurrentTimeDisplay() {
-            try {
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString('ko-KR', { 
-                    hour: '2-digit', 
-                    minute: '2-digit',
-                    hour12: false 
-                });
-                
-                const currentTimeEl = document.getElementById('currentTime');
-                if (currentTimeEl) {
-                    currentTimeEl.textContent = timeStr;
-                }
-                
-                const schedule = getScheduleForDate(currentDate);
-                const taskIndices = findCurrentAndNextTasks();
-                
-                const currentTaskEl = document.getElementById('currentTask');
-                if (currentTaskEl) {
-                    if (taskIndices.current !== -1) {
-                        const currentTask = schedule[taskIndices.current];
-                        currentTaskEl.textContent = `🔥 ${currentTask.task}`;
-                        currentTaskEl.style.background = '#fef3c7';
-                        currentTaskEl.style.borderLeftColor = '#f59e0b';
-                    } else if (taskIndices.next !== -1) {
-                        const nextTask = schedule[taskIndices.next];
-                        currentTaskEl.textContent = `⏰ 다음: ${nextTask.task}`;
-                        currentTaskEl.style.background = '#e0f2fe';
-                        currentTaskEl.style.borderLeftColor = '#0ea5e9';
-                    } else {
-                        currentTaskEl.textContent = '🌟 현재 예정된 작업이 없습니다';
-                        currentTaskEl.style.background = '#f0f9ff';
-                        currentTaskEl.style.borderLeftColor = '#0ea5e9';
-                    }
-                }
-                
-                return taskIndices;
-            } catch (error) {
-                console.error('시간 표시 업데이트 오류:', error);
-                return { current: -1, next: -1 };
-            }
-        }
-
-        function generateChecklist() {
-            try {
-                const schedule = getScheduleForDate(currentDate);
-                
-                const dateText = formatDate(currentDate);
-                const dateDisplayEl = document.getElementById('dateDisplay');
-                const checklistTitleEl = document.getElementById('checklistTitle');
-                
-                if (dateDisplayEl) {
-                    dateDisplayEl.textContent = dateText;
-                }
-                if (checklistTitleEl) {
-                    checklistTitleEl.textContent = `${dateText} 건강 체크리스트`;
-                }
-                
-                const checklistItems = document.getElementById('checklistItems');
-                if (!checklistItems) return;
-                
-                const fragment = document.createDocumentFragment();
-                
-                schedule.forEach((item, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'checklist-item';
-                    itemDiv.id = `item-${index}`;
-                    
-                    itemDiv.innerHTML = `
-                        <input type="checkbox" class="checkbox" id="checkbox-${index}">
-                        <div class="time-badge">${item.time}</div>
-                        <div class="task-text">${item.task}</div>
-                    `;
-                    
-                    const checkbox = itemDiv.querySelector('.checkbox');
-                    if (checkbox) {
-                        checkbox.addEventListener('change', updateProgress);
-                        
-                        itemDiv.addEventListener('click', (e) => {
-                            if (e.target !== checkbox) {
-                                checkbox.checked = !checkbox.checked;
-                                updateProgress();
-                            }
-                        });
-                    }
-                    
-                    fragment.appendChild(itemDiv);
-                });
-                
-                checklistItems.innerHTML = '';
-                checklistItems.appendChild(fragment);
-                
-                updateTaskHighlight();
-                updateStats();
-                
-                console.log('✅ 체크리스트 생성 완료');
-                
-            } catch (error) {
-                console.error('체크리스트 생성 오류:', error);
-            }
-        }
-
-        function updateTaskHighlight() {
-            try {
-                const taskIndices = findCurrentAndNextTasks();
-                const schedule = getScheduleForDate(currentDate);
-                
-                schedule.forEach((item, index) => {
-                    const itemEl = document.getElementById(`item-${index}`);
-                    if (itemEl) {
-                        itemEl.classList.remove('current-time', 'next-task');
-                        
-                        if (index === taskIndices.current) {
-                            itemEl.classList.add('current-time');
-                        } else if (index === taskIndices.next) {
-                            itemEl.classList.add('next-task');
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error('작업 하이라이트 업데이트 오류:', error);
-            }
-        }
-
-        function updateStats() {
-            const schedule = getScheduleForDate(currentDate);
-            
-            let exerciseCount = 0;
-            let mealCount = 0;
-            let sleepCount = 0;
-            let totalCompleted = 0;
-            
-            schedule.forEach((item, index) => {
-                const checkbox = document.getElementById(`checkbox-${index}`);
-                const checklistItem = document.getElementById(`item-${index}`);
-                
-                if (checkbox && checklistItem) {
-                    if (checkbox.checked) {
-                        totalCompleted++;
-                        checklistItem.classList.add('completed');
-                        
-                        switch(item.type) {
-                            case 'exercise': exerciseCount++; break;
-                            case 'meal': mealCount++; break;
-                            case 'sleep': sleepCount++; break;
-                        }
-                    } else {
-                        checklistItem.classList.remove('completed');
-                    }
-                }
-            });
-            
-            const exerciseTotal = schedule.filter(item => item.type === 'exercise').length;
-            const mealTotal = schedule.filter(item => item.type === 'meal').length;
-            const sleepTotal = schedule.filter(item => item.type === 'sleep').length;
-            const totalProgress = Math.round((totalCompleted / schedule.length) * 100);
-            
-            const elements = {
-                exerciseCount: document.getElementById('exerciseCount'),
-                exerciseTotal: document.getElementById('exerciseTotal'),
-                mealCount: document.getElementById('mealCount'),
-                mealTotal: document.getElementById('mealTotal'),
-                sleepCount: document.getElementById('sleepCount'),
-                sleepTotal: document.getElementById('sleepTotal'),
-                totalProgress: document.getElementById('totalProgress'),
-                completionBadge: document.getElementById('completionBadge'),
-                exerciseProgress: document.getElementById('exerciseProgress'),
-                mealProgress: document.getElementById('mealProgress'),
-                sleepProgress: document.getElementById('sleepProgress'),
-                totalProgressBar: document.getElementById('totalProgressBar')
-            };
-
-            if (elements.exerciseCount) elements.exerciseCount.textContent = exerciseCount;
-            if (elements.exerciseTotal) elements.exerciseTotal.textContent = exerciseTotal;
-            if (elements.mealCount) elements.mealCount.textContent = mealCount;
-            if (elements.mealTotal) elements.mealTotal.textContent = mealTotal;
-            if (elements.sleepCount) elements.sleepCount.textContent = sleepCount;
-            if (elements.sleepTotal) elements.sleepTotal.textContent = sleepTotal;
-            if (elements.totalProgress) elements.totalProgress.textContent = totalProgress;
-            if (elements.completionBadge) elements.completionBadge.textContent = `${totalCompleted}/${schedule.length} 완료`;
-            
-            if (elements.exerciseProgress) elements.exerciseProgress.style.width = `${(exerciseCount / exerciseTotal) * 100}%`;
-            if (elements.mealProgress) elements.mealProgress.style.width = `${(mealCount / mealTotal) * 100}%`;
-            if (elements.sleepProgress) elements.sleepProgress.style.width = `${(sleepCount / sleepTotal) * 100}%`;
-            if (elements.totalProgressBar) elements.totalProgressBar.style.width = `${totalProgress}%`;
-            
-            const celebration = document.getElementById('completionCelebration');
-            if (celebration) {
-                if (totalCompleted === schedule.length && schedule.length > 0) {
-                    celebration.classList.add('show');
-                } else {
-                    celebration.classList.remove('show');
-                }
-            }
-        }
-
-        function updateProgress() {
-            updateStats();
-            saveChecklistData();
-            updateTodayInChart();
-        }
-
-        function updateTodayInChart() {
-            const today = new Date();
-            const currentDateStr = currentDate.toISOString().split('T')[0];
-            const todayStr = today.toISOString().split('T')[0];
-            
-            if (currentDateStr !== todayStr) return;
-
-            const schedule = getScheduleForDate(currentDate);
-            let totalCompleted = 0;
-            
-            schedule.forEach((item, index) => {
-                const checkbox = document.getElementById(`checkbox-${index}`);
-                if (checkbox && checkbox.checked) {
-                    totalCompleted++;
-                }
-            });
-            
-            const currentPercentage = Math.round((totalCompleted / schedule.length) * 100);
-            
-            const todayBar = document.querySelector('.day-bar.today');
-            if (todayBar) {
-                const barFill = todayBar.querySelector('.bar-fill');
-                const percentage = todayBar.querySelector('.bar-percentage');
-                
-                if (barFill && percentage) {
-                    barFill.style.height = `${currentPercentage}%`;
-                    percentage.textContent = `${currentPercentage}%`;
-                }
-            }
-            
-            console.log(`📊 오늘 진행률 업데이트: ${currentPercentage}%`);
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            if (notification) {
-                notification.textContent = message;
-                notification.className = `notification ${type} show`;
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
-            }
-        }
-
-        function updateSaveIndicator(status) {
-            const indicator = document.getElementById('saveIndicator');
-            if (!indicator) return;
-            
-            indicator.className = `save-indicator ${status}`;
-            
-            switch(status) {
-                case 'saving':
-                    indicator.textContent = '💾 저장중...';
-                    break;
-                case 'saved':
-                    indicator.textContent = '✅ 저장완료';
-                    setTimeout(() => {
-                        indicator.className = 'save-indicator';
-                        indicator.textContent = '💾 자동저장';
-                    }, 2000);
-                    break;
-                case 'error':
-                    indicator.textContent = '❌ 저장실패';
-                    setTimeout(() => {
-                        indicator.className = 'save-indicator';
-                        indicator.textContent = '💾 자동저장';
-                    }, 3000);
-                    break;
-                default:
-                    indicator.textContent = '💾 자동저장';
-            }
-        }
-
-        async function saveChecklistData() {
-            if (!firebaseInitialized) return;
-
-            const dateStr = currentDate.toISOString().split('T')[0];
-            updateSaveIndicator('saving');
-
-            try {
-                const schedule = getScheduleForDate(currentDate);
-                
-                const dailyData = schedule.map((item, index) => {
-                    const checkbox = document.getElementById(`checkbox-${index}`);
-                    return {
-                        time: item.time,
-                        task: item.task,
-                        type: item.type,
-                        completed: checkbox ? checkbox.checked : false
-                    };
-                });
-
-                await setDoc(doc(db, 'healthTracker', dateStr), {
-                    date: dateStr,
-                    dayOfWeek: dayNames[currentDate.getDay()],
-                    schedule: dailyData,
-                    lastUpdated: new Date().toISOString()
-                });
-
-                updateSaveIndicator('saved');
-                console.log('✅ 체크리스트 저장 완료:', dateStr);
-
-            } catch (error) {
-                console.error('❌ 체크리스트 저장 실패:', error);
-                updateSaveIndicator('error');
-                showNotification('저장 실패: ' + error.message, 'error');
-            }
-        }
-
-        async function loadChecklistData() {
-            if (!firebaseInitialized) return;
-
-            const dateStr = currentDate.toISOString().split('T')[0];
-
-            try {
-                console.log(`📂 체크리스트 로딩: ${dateStr}`);
-                
-                const docSnap = await getDoc(doc(db, 'healthTracker', dateStr));
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const schedule = data.schedule;
-                    
-                    await new Promise(resolve => setTimeout(resolve, 100));
-
-                    schedule.forEach((item, index) => {
-                        const checkbox = document.getElementById(`checkbox-${index}`);
-                        if (checkbox) {
-                            checkbox.checked = item.completed;
-                        }
-                    });
-                    
-                    updateStats();
-                    console.log('📂 체크리스트 로드 완료:', dateStr);
-                } else {
-                    console.log(`📭 데이터 없음: ${dateStr}`);
-                }
-            } catch (error) {
-                console.error('❌ 체크리스트 로드 실패:', error);
-            }
-        }
-
-        async function savePermanentMemo() {
-            if (!firebaseInitialized) return;
-
-            const memoTextarea = document.getElementById('permanentMemo');
-            if (!memoTextarea) return;
-
-            try {
-                const memoText = memoTextarea.value.trim();
-                
-                await setDoc(doc(db, 'permanentData', 'memo'), {
-                    content: memoText,
-                    lastUpdated: new Date().toISOString()
-                });
-
-                console.log('📝 영구 메모 저장 완료');
-            } catch (error) {
-                console.error('❌ 메모 저장 실패:', error);
-                showNotification('메모 저장 실패: ' + error.message, 'error');
-            }
-        }
-
-        async function loadPermanentMemo() {
-            if (!firebaseInitialized || memoLoaded) return;
-
-            try {
-                console.log('📝 메모 로딩 시작...');
-                
-                const docSnap = await getDoc(doc(db, 'permanentData', 'memo'));
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    
-                    const memoTextarea = document.getElementById('permanentMemo');
-                    
-                    if (memoTextarea) {
-                        memoTextarea.value = data.content || '';
-                        updateMemoCount();
-                        memoLoaded = true;
-                        console.log('📝 메모 로드 완료');
-                    }
-                } else {
-                    console.log('📭 저장된 메모 없음');
-                }
-                
-            } catch (error) {
-                console.error('❌ 메모 로드 실패:', error);
-            }
-        }
-
-        function updateMemoCount() {
-            const memoTextarea = document.getElementById('permanentMemo');
-            const memoCharCount = document.getElementById('memoCharCount');
-            
-            if (memoTextarea && memoCharCount) {
-                let length = memoTextarea.value.length;
-                
-                if (length > 1000) {
-                    memoTextarea.value = memoTextarea.value.substring(0, 1000);
-                    length = 1000;
-                }
-                
-                memoCharCount.textContent = length;
-                
-                if (length > 900) {
-                    memoCharCount.style.color = '#ef4444';
-                } else if (length > 800) {
-                    memoCharCount.style.color = '#f59e0b';
-                } else {
-                    memoCharCount.style.color = '#6b7280';
-                }
-            }
-        }
-
-        let memoSaveTimeout;
-        function setupMemoEvents() {
-            const memoTextarea = document.getElementById('permanentMemo');
-            const memoSaveBtn = document.getElementById('memoSaveBtn');
-            
-            if (memoTextarea) {
-                memoTextarea.addEventListener('input', updateMemoCount);
-                
-                memoTextarea.addEventListener('input', () => {
-                    clearTimeout(memoSaveTimeout);
-                    memoSaveTimeout = setTimeout(savePermanentMemo, 3000);
-                });
-            }
-            
-            if (memoSaveBtn) {
-                memoSaveBtn.addEventListener('click', () => {
-                    clearTimeout(memoSaveTimeout);
-                    savePermanentMemo();
-                    memoSaveBtn.textContent = '✅ 저장됨';
-                    memoSaveBtn.classList.add('saved');
-                    setTimeout(() => {
-                        memoSaveBtn.textContent = '💾 메모 저장';
-                        memoSaveBtn.classList.remove('saved');
-                    }, 2000);
-                });
-            }
-        }
-
-        function setupEventListeners() {
-            const prevDayBtn = document.getElementById('prevDayBtn');
-            const nextDayBtn = document.getElementById('nextDayBtn');
-
-            if (prevDayBtn) {
-                prevDayBtn.addEventListener('click', async () => {
-                    currentDate.setDate(currentDate.getDate() - 1);
-                    generateChecklist();
-                    await Promise.all([loadChecklistData(), updateWeightDisplay()]);
-                });
-            }
-            
-            if (nextDayBtn) {
-                nextDayBtn.addEventListener('click', async () => {
-                    currentDate.setDate(currentDate.getDate() + 1);
-                    generateChecklist();
-                    await Promise.all([loadChecklistData(), updateWeightDisplay()]);
-                });
-            }
-            
-            setupMemoEvents();
-            setupWeightEvents();
-        }
-
-        function initializeUI() {
-            setupEventListeners();
-            updateCurrentTimeDisplay();
-            generateChecklist();
-        }
-
-        async function startApp() {
-            console.log('🚀 건강관리 트래커 시작!');
-            
-            try {
-                const firebaseConnected = await initializeFirebase();
-                
-                if (!firebaseConnected) {
-                    document.body.innerHTML = `
-                        <div style="
-                            display: flex;
-                            flex-direction: column;
-                            justify-content: center;
-                            align-items: center;
-                            height: 100vh;
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                            color: white;
-                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                            text-align: center;
-                            padding: 20px;
-                        ">
-                            <div style="
-                                background: rgba(255,255,255,0.1);
-                                padding: 40px;
-                                border-radius: 20px;
-                                backdrop-filter: blur(10px);
-                                max-width: 500px;
-                            ">
-                                <h1 style="font-size: 2rem; margin-bottom: 20px;">🔥 Firebase 연결 필요</h1>
-                                <p style="font-size: 1.1rem; margin-bottom: 30px; line-height: 1.6;">
-                                    이 앱은 Firebase 클라우드 저장소가 필수입니다.<br>
-                                    네트워크 연결을 확인하고 다시 시도해주세요.
-                                </p>
-                                <button onclick="location.reload()" style="
-                                    background: #4CAF50;
-                                    color: white;
-                                    border: none;
-                                    padding: 15px 30px;
-                                    font-size: 1rem;
-                                    border-radius: 10px;
-                                    cursor: pointer;
-                                    transition: all 0.3s;
-                                " onmouseover="this.style.background='#45a049'">
-                                    🔄 다시 시도
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                initializeUI();
-                
-                console.log('📊 데이터 로딩 시작...');
-                
-                await Promise.all([
-                    loadChecklistData(),
-                    loadPermanentMemo(),
-                    updateWeightDisplay(),
-                    createWeeklyChart()
-                ]);
-                
-                setTimeout(() => {
-                    updateStats();
-                    updateCurrentTimeDisplay();
-                    updateTaskHighlight();
-                    console.log('✅ 모든 데이터 로딩 완료');
-                }, 200);
-                
-                showNotification('Firebase 연결 완료! 모든 데이터가 클라우드에 저장됩니다', 'success');
-                console.log('✅ 앱 초기화 완료');
-                
-            } catch (error) {
-                console.error('❌ 앱 초기화 오류:', error);
-                showNotification('앱 초기화 오류: ' + error.message, 'error');
-            }
-        }
-
-        function startTimeUpdater() {
-            updateCurrentTimeDisplay();
-            updateTaskHighlight();
-            
-            setInterval(() => {
-                try {
-                    updateCurrentTimeDisplay();
-                    updateTaskHighlight();
-                } catch (error) {
-                    console.error('시간 업데이트 오류:', error);
-                }
-            }, 60000);
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            await startApp();
-            startTimeUpdater();
-        });
-    </script>
-</body>
-</html>
