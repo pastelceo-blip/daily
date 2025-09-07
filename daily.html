@@ -1434,8 +1434,6 @@
         }
 
         function generateChecklist() {
-            console.log('📝 체크리스트 생성 시작');
-            
             try {
                 const schedule = getScheduleForDate(currentDate);
                 
@@ -1544,8 +1542,6 @@
                 
                 updateTaskHighlight();
                 updateStats();
-                
-                console.log('✅ 체크리스트 생성 완료');
                 
             } catch (error) {
                 console.error('체크리스트 생성 오류:', error);
