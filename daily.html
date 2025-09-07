@@ -1159,12 +1159,19 @@
     <script>
         console.log('🚀 스크립트 시작');
 
-        // Firebase 설정
+        // Firebase 설정 및 전역 변수
         let firebaseApp = null;
         let db = null;
         let firebaseInitialized = false;
         let currentDate = new Date();
         let isInitializing = false;
+        
+        // 데이터 저장 관리를 위한 변수들
+        let saveQueue = new Map();
+        let isSaving = false;
+        let lastSaveTime = 0;
+        const SAVE_DELAY = 2000;
+        const MIN_SAVE_INTERVAL = 1000;
 
         const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
         const dayNamesShort = ['일', '월', '화', '수', '목', '금', '토'];
@@ -1218,6 +1225,8 @@
             ]
         };
 
+        // ===== 모든 함수들을 순서대로 정의 =====
+
         // Firebase 초기화 함수
         async function initializeFirebase() {
             if (firebaseInitialized || isInitializing) {
@@ -1258,7 +1267,7 @@
             }
         }
 
-        // 기본 함수들
+        // 기본 유틸리티 함수들
         function getScheduleForDate(date) {
             const dayIndex = date.getDay();
             if (dayIndex === 0) return schedules.sunday;
@@ -1331,6 +1340,7 @@
             return { current: currentTaskIndex, next: nextTaskIndex };
         }
 
+        // 시간 관련 표시 함수들
         function updateCurrentTimeDisplay() {
             try {
                 const now = new Date();
@@ -1365,321 +1375,3 @@
                         currentTaskEl.style.background = '#f0f9ff';
                         currentTaskEl.style.borderLeftColor = '#0ea5e9';
                     }
-                }
-                
-                return taskIndices;
-            } catch (error) {
-                console.error('시간 표시 업데이트 오류:', error);
-                return { current: -1, next: -1 };
-            }
-        }
-
-        function toggleExerciseDetails(index) {
-            const detailsDiv = document.getElementById(`details-${index}`);
-            const expandBtn = document.querySelector(`[data-index="${index}"]`);
-            
-            if (detailsDiv && expandBtn) {
-                if (detailsDiv.classList.contains('show')) {
-                    detailsDiv.classList.remove('show');
-                    expandBtn.classList.remove('expanded');
-                    expandBtn.textContent = '▶';
-                } else {
-                    detailsDiv.classList.add('show');
-                    expandBtn.classList.add('expanded');
-                    expandBtn.textContent = '▼';
-                }
-            }
-        }
-
-        function updateExerciseProgress(index) {
-            const schedule = getScheduleForDate(currentDate);
-            const item = schedule[index];
-            
-            if (!item.hasDetails || !exerciseDetails[item.task]) return;
-            
-            const totalExercises = exerciseDetails[item.task].length;
-            let completedExercises = 0;
-            
-            exerciseDetails[item.task].forEach((exercise, exerciseIndex) => {
-                const exerciseCheckbox = document.getElementById(`exercise-${index}-${exerciseIndex}`);
-                if (exerciseCheckbox && exerciseCheckbox.checked) {
-                    completedExercises++;
-                    
-                    const exerciseItem = exerciseCheckbox.closest('.exercise-item');
-                    if (exerciseItem) {
-                        exerciseItem.classList.add('completed');
-                    }
-                } else {
-                    const exerciseItem = exerciseCheckbox.closest('.exercise-item');
-                    if (exerciseItem) {
-                        exerciseItem.classList.remove('completed');
-                    }
-                }
-            });
-            
-            const progressEl = document.getElementById(`progress-${index}`);
-            if (progressEl) {
-                progressEl.textContent = `${completedExercises}/${totalExercises} 완료`;
-            }
-            
-            const mainCheckbox = document.getElementById(`checkbox-${index}`);
-            if (mainCheckbox) {
-                if (completedExercises === totalExercises) {
-                    mainCheckbox.checked = true;
-                } else {
-                    mainCheckbox.checked = false;
-                }
-                updateProgress();
-            }
-        }
-
-        function generateChecklist() {
-            try {
-                const schedule = getScheduleForDate(currentDate);
-                
-                const dateText = formatDate(currentDate);
-                const dateDisplayEl = document.getElementById('dateDisplay');
-                const checklistTitleEl = document.getElementById('checklistTitle');
-                
-                if (dateDisplayEl) {
-                    dateDisplayEl.textContent = dateText;
-                }
-                if (checklistTitleEl) {
-                    checklistTitleEl.textContent = `${dateText} 건강 체크리스트`;
-                }
-                
-                const checklistItems = document.getElementById('checklistItems');
-                if (!checklistItems) return;
-                
-                const fragment = document.createDocumentFragment();
-                
-                schedule.forEach((item, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'checklist-item';
-                    itemDiv.id = `item-${index}`;
-                    
-                    const itemContent = document.createElement('div');
-                    itemContent.style.display = 'flex';
-                    itemContent.style.alignItems = 'center';
-                    itemContent.style.width = '100%';
-                    
-                    itemContent.innerHTML = `
-                        <input type="checkbox" class="checkbox" id="checkbox-${index}">
-                        <div class="time-badge">${item.time}</div>
-                        <div class="task-text">${item.task}</div>
-                        ${item.hasDetails ? '<button class="exercise-expand-btn" data-index="' + index + '">▶</button>' : ''}
-                    `;
-                    
-                    itemDiv.appendChild(itemContent);
-                    
-                    if (item.hasDetails && exerciseDetails[item.task]) {
-                        const detailsDiv = document.createElement('div');
-                        detailsDiv.className = 'exercise-details';
-                        detailsDiv.id = `details-${index}`;
-                        
-                        let exerciseListHTML = '<div class="exercise-list">';
-                        exerciseDetails[item.task].forEach((exercise, exerciseIndex) => {
-                            exerciseListHTML += `
-                                <div class="exercise-item">
-                                    <input type="checkbox" class="exercise-checkbox" id="exercise-${index}-${exerciseIndex}">
-                                    <div class="exercise-name">${exercise.name}</div>
-                                    <div class="exercise-details-text">${exercise.details}</div>
-                                </div>
-                            `;
-                        });
-                        exerciseListHTML += '</div>';
-                        
-                        exerciseListHTML += `
-                            <div class="exercise-progress">
-                                <div class="exercise-progress-text" id="progress-${index}">
-                                    0/${exerciseDetails[item.task].length} 완료
-                                </div>
-                            </div>
-                        `;
-                        
-                        detailsDiv.innerHTML = exerciseListHTML;
-                        itemDiv.appendChild(detailsDiv);
-                    }
-                    
-                    const checkbox = itemContent.querySelector('.checkbox');
-                    if (checkbox) {
-                        checkbox.addEventListener('change', updateProgress);
-                        
-                        itemContent.addEventListener('click', (e) => {
-                            if (e.target !== checkbox && !e.target.classList.contains('exercise-expand-btn')) {
-                                checkbox.checked = !checkbox.checked;
-                                updateProgress();
-                            }
-                        });
-                    }
-                    
-                    const expandBtn = itemContent.querySelector('.exercise-expand-btn');
-                    if (expandBtn) {
-                        expandBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            toggleExerciseDetails(index);
-                        });
-                    }
-                    
-                    if (item.hasDetails && exerciseDetails[item.task]) {
-                        exerciseDetails[item.task].forEach((exercise, exerciseIndex) => {
-                            setTimeout(() => {
-                                const exerciseCheckbox = document.getElementById(`exercise-${index}-${exerciseIndex}`);
-                                if (exerciseCheckbox) {
-                                    exerciseCheckbox.addEventListener('change', () => {
-                                        updateExerciseProgress(index);
-                                    });
-                                }
-                            }, 100);
-                        });
-                    }
-                    
-                    fragment.appendChild(itemDiv);
-                });
-                
-                checklistItems.innerHTML = '';
-                checklistItems.appendChild(fragment);
-                
-                updateTaskHighlight();
-                updateStats();
-                
-            } catch (error) {
-                console.error('체크리스트 생성 오류:', error);
-                const checklistItems = document.getElementById('checklistItems');
-                if (checklistItems) {
-                    checklistItems.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">체크리스트 생성 오류가 발생했습니다.</div>';
-                }
-            }
-        }
-
-        function updateTaskHighlight() {
-            try {
-                const taskIndices = findCurrentAndNextTasks();
-                const schedule = getScheduleForDate(currentDate);
-                
-                schedule.forEach((item, index) => {
-                    const itemEl = document.getElementById(`item-${index}`);
-                    if (itemEl) {
-                        itemEl.classList.remove('current-time', 'next-task');
-                        
-                        if (index === taskIndices.current) {
-                            itemEl.classList.add('current-time');
-                        } else if (index === taskIndices.next) {
-                            itemEl.classList.add('next-task');
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error('작업 하이라이트 업데이트 오류:', error);
-            }
-        }
-
-        function updateStats() {
-            const schedule = getScheduleForDate(currentDate);
-            
-            let exerciseCount = 0;
-            let mealCount = 0;
-            let sleepCount = 0;
-            let totalCompleted = 0;
-            
-            schedule.forEach((item, index) => {
-                const checkbox = document.getElementById(`checkbox-${index}`);
-                const checklistItem = document.getElementById(`item-${index}`);
-                
-                if (checkbox && checklistItem) {
-                    if (checkbox.checked) {
-                        totalCompleted++;
-                        checklistItem.classList.add('completed');
-                        
-                        switch(item.type) {
-                            case 'exercise': exerciseCount++; break;
-                            case 'meal': mealCount++; break;
-                            case 'sleep': sleepCount++; break;
-                        }
-                    } else {
-                        checklistItem.classList.remove('completed');
-                    }
-                }
-            });
-            
-            const exerciseTotal = schedule.filter(item => item.type === 'exercise').length;
-            const mealTotal = schedule.filter(item => item.type === 'meal').length;
-            const sleepTotal = schedule.filter(item => item.type === 'sleep').length;
-            const totalProgress = Math.round((totalCompleted / schedule.length) * 100);
-            
-            const elements = {
-                exerciseCount: document.getElementById('exerciseCount'),
-                exerciseTotal: document.getElementById('exerciseTotal'),
-                mealCount: document.getElementById('mealCount'),
-                mealTotal: document.getElementById('mealTotal'),
-                sleepCount: document.getElementById('sleepCount'),
-                sleepTotal: document.getElementById('sleepTotal'),
-                totalProgress: document.getElementById('totalProgress'),
-                completionBadge: document.getElementById('completionBadge'),
-                exerciseProgress: document.getElementById('exerciseProgress'),
-                mealProgress: document.getElementById('mealProgress'),
-                sleepProgress: document.getElementById('sleepProgress'),
-                totalProgressBar: document.getElementById('totalProgressBar')
-            };
-
-            if (elements.exerciseCount) elements.exerciseCount.textContent = exerciseCount;
-            if (elements.exerciseTotal) elements.exerciseTotal.textContent = exerciseTotal;
-            if (elements.mealCount) elements.mealCount.textContent = mealCount;
-            if (elements.mealTotal) elements.mealTotal.textContent = mealTotal;
-            if (elements.sleepCount) elements.sleepCount.textContent = sleepCount;
-            if (elements.sleepTotal) elements.sleepTotal.textContent = sleepTotal;
-            if (elements.totalProgress) elements.totalProgress.textContent = totalProgress;
-            if (elements.completionBadge) elements.completionBadge.textContent = `${totalCompleted}/${schedule.length} 완료`;
-            
-            if (elements.exerciseProgress) elements.exerciseProgress.style.width = `${(exerciseCount / exerciseTotal) * 100}%`;
-            if (elements.mealProgress) elements.mealProgress.style.width = `${(mealCount / mealTotal) * 100}%`;
-            if (elements.sleepProgress) elements.sleepProgress.style.width = `${(sleepCount / sleepTotal) * 100}%`;
-            if (elements.totalProgressBar) elements.totalProgressBar.style.width = `${totalProgress}%`;
-            
-            const celebration = document.getElementById('completionCelebration');
-            if (celebration) {
-                if (totalCompleted === schedule.length && schedule.length > 0) {
-                    celebration.classList.add('show');
-                } else {
-                    celebration.classList.remove('show');
-                }
-            }
-        }
-
-        function updateProgress() {
-            updateStats();
-            
-            if (firebaseInitialized) {
-                showSaveIndicator('saving');
-                
-                clearTimeout(window.saveTimeout);
-                window.saveTimeout = setTimeout(() => {
-                    saveChecklistData().then(success => {
-                        if (success) {
-                            console.log('📊 자동 저장 완료');
-                        }
-                    }).catch(error => {
-                        console.error('📊 자동 저장 실패:', error);
-                    });
-                }, 1000);
-            }
-        }
-
-        // Firebase 관련 함수들
-        async function saveChecklistData() {
-            if (!firebaseInitialized) return false;
-
-            try {
-                const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-                
-                const dateStr = currentDate.toISOString().split('T')[0];
-                const schedule = getScheduleForDate(currentDate);
-                
-                // 현재 상태 수집
-                const dailyData = schedule.map((item, index) => {
-                    const checkbox = document.getElementById(`checkbox-${index}`);
-                    const taskData = {
-                        time: item.time,
-                        task: item.task,
-                        type: item.type,
-                        completed: checkbox ? checkbox.checked : false,
