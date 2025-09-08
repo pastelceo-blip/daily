@@ -207,7 +207,6 @@
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
         }
 
-        /* 체중 그래프 */
         .weight-chart-section {
             background: var(--surface);
             border-radius: 15px;
@@ -970,7 +969,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* 모바일 최적화 */
         @media (max-width: 768px) {
             .container { 
                 padding: 8px; 
@@ -1039,7 +1037,6 @@
             </div>
         </div>
 
-        <!-- 주간 달성률 그래프 -->
         <div class="weekly-progress-section">
             <div class="weekly-progress-header">
                 <div class="weekly-progress-title">📊 주간 달성률 (최근 7일)</div>
@@ -1050,7 +1047,6 @@
             </div>
         </div>
 
-        <!-- 체중 그래프 섹션 -->
         <div class="weight-chart-section">
             <div class="weight-chart-header">
                 <div class="weight-chart-title">📈 최근 7일 체중 변화</div>
@@ -1109,7 +1105,6 @@
             <p>모든 목표를 달성했습니다. 계속해서 건강한 습관을 유지해보세요!</p>
         </div>
 
-        <!-- 메모 섹션 -->
         <div class="memo-section">
             <div class="memo-header">
                 <h3>📝 나만의 메모</h3>
@@ -1136,7 +1131,6 @@
             </div>
         </div>
 
-        <!-- 체중 입력 섹션 -->
         <div class="weight-input-section">
             <div class="weight-input-header">
                 <h3>⚖️ 체중 기록</h3>
@@ -1159,12 +1153,17 @@
     <script>
         console.log('🚀 스크립트 시작');
 
-        // Firebase 설정
         let firebaseApp = null;
         let db = null;
         let firebaseInitialized = false;
         let currentDate = new Date();
         let isInitializing = false;
+        
+        let saveQueue = new Map();
+        let isSaving = false;
+        let lastSaveTime = 0;
+        const SAVE_DELAY = 2000;
+        const MIN_SAVE_INTERVAL = 1000;
 
         const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
         const dayNamesShort = ['일', '월', '화', '수', '목', '금', '토'];
@@ -1218,9 +1217,10 @@
             ]
         };
 
-        // Firebase 초기화 함수
+        // Firebase 초기화
         async function initializeFirebase() {
             if (firebaseInitialized || isInitializing) {
+                console.log(`🔄 Firebase 상태: initialized=${firebaseInitialized}, initializing=${isInitializing}`);
                 return firebaseInitialized;
             }
             
@@ -1228,8 +1228,10 @@
             console.log('🔄 Firebase 초기화 시작');
             
             try {
+                console.log('📦 Firebase 모듈 로딩 시작...');
                 const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
                 const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+                console.log('📦 Firebase 모듈 로딩 완료');
                 
                 const firebaseConfig = {
                     apiKey: "AIzaSyAAXr7parhL6wQuUzy4MPvVhV6-J53wzcA",
@@ -1242,23 +1244,48 @@
                     measurementId: "G-LK2Q13294B"
                 };
 
+                console.log('🔧 Firebase 앱 초기화 중...');
                 firebaseApp = initializeApp(firebaseConfig);
+                console.log('🔧 Firestore 초기화 중...');
                 db = getFirestore(firebaseApp);
                 
-                firebaseInitialized = true;
-                console.log('✅ Firebase 초기화 성공');
-                return true;
+                console.log('🧪 Firebase 연결 테스트 중...');
+                const testResult = await testFirebaseConnection();
+                
+                if (testResult) {
+                    firebaseInitialized = true;
+                    console.log('✅ Firebase 초기화 및 연결 테스트 성공');
+                    showNotification('Firebase 연결 성공!', 'success');
+                    return true;
+                } else {
+                    throw new Error('Firebase 연결 테스트 실패');
+                }
                 
             } catch (error) {
                 console.error('❌ Firebase 초기화 실패:', error);
+                console.error('❌ 오류 상세:', error.message);
                 firebaseInitialized = false;
+                showNotification('Firebase 연결 실패: ' + error.message, 'error');
                 return false;
             } finally {
                 isInitializing = false;
             }
         }
 
-        // 기본 함수들
+        async function testFirebaseConnection() {
+            try {
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+                const testDoc = doc(db, 'test', 'connection');
+                await getDoc(testDoc);
+                console.log('✅ Firebase 연결 테스트 성공');
+                return true;
+            } catch (error) {
+                console.error('❌ Firebase 연결 테스트 실패:', error);
+                return false;
+            }
+        }
+
+        // 기본 유틸리티 함수들
         function getScheduleForDate(date) {
             const dayIndex = date.getDay();
             if (dayIndex === 0) return schedules.sunday;
@@ -1374,6 +1401,135 @@
             }
         }
 
+        function updateTaskHighlight() {
+            try {
+                const taskIndices = findCurrentAndNextTasks();
+                const schedule = getScheduleForDate(currentDate);
+                
+                schedule.forEach((item, index) => {
+                    const itemEl = document.getElementById(`item-${index}`);
+                    if (itemEl) {
+                        itemEl.classList.remove('current-time', 'next-task');
+                        
+                        if (index === taskIndices.current) {
+                            itemEl.classList.add('current-time');
+                        } else if (index === taskIndices.next) {
+                            itemEl.classList.add('next-task');
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('작업 하이라이트 업데이트 오류:', error);
+            }
+        }
+
+        // 저장 시스템
+        function queueSave(type, data = null) {
+            const now = Date.now();
+            saveQueue.set(type, { data, timestamp: now });
+            
+            console.log(`📝 저장 큐에 추가: ${type}`);
+            
+            if (window.saveTimeout) {
+                clearTimeout(window.saveTimeout);
+            }
+            
+            window.saveTimeout = setTimeout(() => {
+                processSaveQueue();
+            }, SAVE_DELAY);
+        }
+
+        async function processSaveQueue() {
+            if (isSaving || !firebaseInitialized || saveQueue.size === 0) {
+                return;
+            }
+            
+            const now = Date.now();
+            if (now - lastSaveTime < MIN_SAVE_INTERVAL) {
+                setTimeout(processSaveQueue, MIN_SAVE_INTERVAL - (now - lastSaveTime));
+                return;
+            }
+            
+            isSaving = true;
+            showSaveIndicator('saving');
+            
+            try {
+                console.log(`💾 저장 처리 시작 (${saveQueue.size}개 항목)`);
+                
+                const savePromises = [];
+                const queueCopy = new Map(saveQueue);
+                saveQueue.clear();
+                
+                for (const [type, { data }] of queueCopy) {
+                    switch (type) {
+                        case 'checklist':
+                            savePromises.push(saveChecklistData());
+                            break;
+                        case 'memo':
+                            savePromises.push(savePermanentMemo());
+                            break;
+                        case 'weight':
+                            if (data) {
+                                savePromises.push(saveWeightData(data));
+                            }
+                            break;
+                    }
+                }
+                
+                if (savePromises.length > 0) {
+                    const results = await Promise.allSettled(savePromises);
+                    const failures = results.filter(r => r.status === 'rejected' || r.value === false);
+                    
+                    if (failures.length === 0) {
+                        console.log('✅ 모든 데이터 저장 완료');
+                        showSaveIndicator('saved');
+                    } else {
+                        console.error(`❌ ${failures.length}개 저장 실패`);
+                        showSaveIndicator('error');
+                    }
+                }
+                
+                lastSaveTime = now;
+                
+            } catch (error) {
+                console.error('❌ 저장 처리 오류:', error);
+                showSaveIndicator('error');
+            } finally {
+                isSaving = false;
+            }
+        }
+
+        function showSaveIndicator(status) {
+            const saveIndicator = document.getElementById('saveIndicator');
+            if (!saveIndicator) return;
+
+            saveIndicator.className = 'save-indicator';
+            
+            switch(status) {
+                case 'saving':
+                    saveIndicator.textContent = '💾 저장 중...';
+                    saveIndicator.classList.add('saving');
+                    break;
+                case 'saved':
+                    saveIndicator.textContent = '✅ 저장 완료';
+                    saveIndicator.classList.add('saved');
+                    setTimeout(() => {
+                        saveIndicator.style.display = 'none';
+                    }, 2000);
+                    break;
+                case 'error':
+                    saveIndicator.textContent = '❌ 저장 실패';
+                    saveIndicator.classList.add('error');
+                    setTimeout(() => {
+                        saveIndicator.style.display = 'none';
+                    }, 3000);
+                    break;
+            }
+            
+            saveIndicator.style.display = 'block';
+        }
+
+        // 운동 관련 함수들
         function toggleExerciseDetails(index) {
             const detailsDiv = document.getElementById(`details-${index}`);
             const expandBtn = document.querySelector(`[data-index="${index}"]`);
@@ -1410,7 +1566,7 @@
                         exerciseItem.classList.add('completed');
                     }
                 } else {
-                    const exerciseItem = exerciseCheckbox.closest('.exercise-item');
+                    const exerciseItem = exerciseCheckbox ? exerciseCheckbox.closest('.exercise-item') : null;
                     if (exerciseItem) {
                         exerciseItem.classList.remove('completed');
                     }
@@ -1424,15 +1580,18 @@
             
             const mainCheckbox = document.getElementById(`checkbox-${index}`);
             if (mainCheckbox) {
-                if (completedExercises === totalExercises) {
-                    mainCheckbox.checked = true;
-                } else {
-                    mainCheckbox.checked = false;
+                const wasChecked = mainCheckbox.checked;
+                const shouldBeChecked = completedExercises === totalExercises;
+                
+                if (wasChecked !== shouldBeChecked) {
+                    mainCheckbox.checked = shouldBeChecked;
+                    updateStats();
+                    queueSave('checklist');
                 }
-                updateProgress();
             }
         }
 
+        // 체크리스트 생성
         function generateChecklist() {
             try {
                 const schedule = getScheduleForDate(currentDate);
@@ -1503,7 +1662,10 @@
                     
                     const checkbox = itemContent.querySelector('.checkbox');
                     if (checkbox) {
-                        checkbox.addEventListener('change', updateProgress);
+                        checkbox.addEventListener('change', (e) => {
+                            e.stopPropagation();
+                            updateProgress();
+                        });
                         
                         itemContent.addEventListener('click', (e) => {
                             if (e.target !== checkbox && !e.target.classList.contains('exercise-expand-btn')) {
@@ -1521,24 +1683,27 @@
                         });
                     }
                     
-                    if (item.hasDetails && exerciseDetails[item.task]) {
-                        exerciseDetails[item.task].forEach((exercise, exerciseIndex) => {
-                            setTimeout(() => {
-                                const exerciseCheckbox = document.getElementById(`exercise-${index}-${exerciseIndex}`);
-                                if (exerciseCheckbox) {
-                                    exerciseCheckbox.addEventListener('change', () => {
-                                        updateExerciseProgress(index);
-                                    });
-                                }
-                            }, 100);
-                        });
-                    }
-                    
                     fragment.appendChild(itemDiv);
                 });
                 
                 checklistItems.innerHTML = '';
                 checklistItems.appendChild(fragment);
+                
+                setTimeout(() => {
+                    schedule.forEach((item, index) => {
+                        if (item.hasDetails && exerciseDetails[item.task]) {
+                            exerciseDetails[item.task].forEach((exercise, exerciseIndex) => {
+                                const exerciseCheckbox = document.getElementById(`exercise-${index}-${exerciseIndex}`);
+                                if (exerciseCheckbox) {
+                                    exerciseCheckbox.addEventListener('change', (e) => {
+                                        e.stopPropagation();
+                                        updateExerciseProgress(index);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }, 100);
                 
                 updateTaskHighlight();
                 updateStats();
@@ -1549,28 +1714,6 @@
                 if (checklistItems) {
                     checklistItems.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">체크리스트 생성 오류가 발생했습니다.</div>';
                 }
-            }
-        }
-
-        function updateTaskHighlight() {
-            try {
-                const taskIndices = findCurrentAndNextTasks();
-                const schedule = getScheduleForDate(currentDate);
-                
-                schedule.forEach((item, index) => {
-                    const itemEl = document.getElementById(`item-${index}`);
-                    if (itemEl) {
-                        itemEl.classList.remove('current-time', 'next-task');
-                        
-                        if (index === taskIndices.current) {
-                            itemEl.classList.add('current-time');
-                        } else if (index === taskIndices.next) {
-                            itemEl.classList.add('next-task');
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error('작업 하이라이트 업데이트 오류:', error);
             }
         }
 
@@ -1650,22 +1793,11 @@
             updateStats();
             
             if (firebaseInitialized) {
-                showSaveIndicator('saving');
-                
-                clearTimeout(window.saveTimeout);
-                window.saveTimeout = setTimeout(() => {
-                    saveChecklistData().then(success => {
-                        if (success) {
-                            console.log('📊 자동 저장 완료');
-                        }
-                    }).catch(error => {
-                        console.error('📊 자동 저장 실패:', error);
-                    });
-                }, 1000);
+                queueSave('checklist');
             }
         }
 
-        // Firebase 관련 함수들
+        // Firebase 데이터 함수들
         async function saveChecklistData() {
             if (!firebaseInitialized) return false;
 
@@ -1675,7 +1807,6 @@
                 const dateStr = currentDate.toISOString().split('T')[0];
                 const schedule = getScheduleForDate(currentDate);
                 
-                // 현재 상태 수집
                 const dailyData = schedule.map((item, index) => {
                     const checkbox = document.getElementById(`checkbox-${index}`);
                     const taskData = {
@@ -1686,7 +1817,6 @@
                         hasDetails: item.hasDetails || false
                     };
                     
-                    // 운동 세부사항이 있는 경우
                     if (item.hasDetails && exerciseDetails[item.task]) {
                         taskData.exerciseDetails = exerciseDetails[item.task].map((exercise, exerciseIndex) => {
                             const exerciseCheckbox = document.getElementById(`exercise-${index}-${exerciseIndex}`);
@@ -1701,11 +1831,9 @@
                     return taskData;
                 });
 
-                // 통계 계산
                 const completedTasks = dailyData.filter(task => task.completed).length;
                 const completionRate = Math.round((completedTasks / schedule.length) * 100);
 
-                // 카테고리별 통계
                 const stats = {
                     exercise: {
                         completed: dailyData.filter(task => task.type === 'exercise' && task.completed).length,
@@ -1721,7 +1849,6 @@
                     }
                 };
 
-                // Firestore에 저장할 데이터 구조
                 const dataToSave = {
                     date: dateStr,
                     dayOfWeek: dayNames[currentDate.getDay()],
@@ -1734,55 +1861,22 @@
                     timestamp: Date.now()
                 };
 
-                // 저장 실행
                 await setDoc(doc(db, 'healthTracker', dateStr), dataToSave);
 
                 console.log(`✅ 체크리스트 저장 완료: ${dateStr} (완료율: ${completionRate}%)`);
-                
-                // 저장 성공 표시
-                showSaveIndicator('saved');
                 return true;
 
             } catch (error) {
                 console.error('❌ 체크리스트 저장 실패:', error);
-                showSaveIndicator('error');
                 return false;
             }
         }
 
-        // 저장 상태 표시 함수
-        function showSaveIndicator(status) {
-            const saveIndicator = document.getElementById('saveIndicator');
-            if (!saveIndicator) return;
-
-            saveIndicator.className = 'save-indicator';
-            
-            switch(status) {
-                case 'saving':
-                    saveIndicator.textContent = '💾 저장 중...';
-                    saveIndicator.classList.add('saving');
-                    break;
-                case 'saved':
-                    saveIndicator.textContent = '✅ 저장 완료';
-                    saveIndicator.classList.add('saved');
-                    setTimeout(() => {
-                        saveIndicator.style.display = 'none';
-                    }, 2000);
-                    break;
-                case 'error':
-                    saveIndicator.textContent = '❌ 저장 실패';
-                    saveIndicator.classList.add('error');
-                    setTimeout(() => {
-                        saveIndicator.style.display = 'none';
-                    }, 3000);
-                    break;
-            }
-            
-            saveIndicator.style.display = 'block';
-        }
-
         async function loadChecklistData() {
-            if (!firebaseInitialized) return false;
+            if (!firebaseInitialized) {
+                console.warn('❌ Firebase가 초기화되지 않아 체크리스트 데이터를 로드할 수 없습니다');
+                return false;
+            }
 
             try {
                 const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
@@ -1790,70 +1884,94 @@
                 const dateStr = currentDate.toISOString().split('T')[0];
                 console.log(`📂 체크리스트 로딩 시작: ${dateStr}`);
                 
-                const docSnap = await getDoc(doc(db, 'healthTracker', dateStr));
+                const docRef = doc(db, 'healthTracker', dateStr);
+                console.log(`📂 문서 참조 생성: healthTracker/${dateStr}`);
+                
+                const docSnap = await getDoc(docRef);
+                console.log(`📂 문서 읽기 완료. 존재 여부: ${docSnap.exists()}`);
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    console.log(`📂 문서 데이터:`, data);
                     
-                    // 데이터 구조 확인
                     if (!data.schedule || !Array.isArray(data.schedule)) {
-                        console.log(`📭 잘못된 데이터 구조: ${dateStr}`);
+                        console.warn(`📭 잘못된 데이터 구조: ${dateStr}`, data);
                         return false;
                     }
                     
-                    console.log(`📂 데이터 발견: ${dateStr} (${data.schedule.length}개 항목)`);
+                    console.log(`📂 유효한 데이터 발견: ${dateStr} (${data.schedule.length}개 항목)`);
                     
-                    // DOM이 준비될 때까지 잠시 대기
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await new Promise(resolve => setTimeout(resolve, 300));
                     
-                    // 체크박스 상태 복원
+                    let loadedItems = 0;
+                    let loadedExercises = 0;
+                    
                     data.schedule.forEach((item, index) => {
                         const checkbox = document.getElementById(`checkbox-${index}`);
                         if (checkbox) {
                             checkbox.checked = item.completed || false;
+                            loadedItems++;
+                            console.log(`✅ 체크박스 ${index} 로드: ${item.completed ? '완료' : '미완료'}`);
+                        } else {
+                            console.warn(`❌ 체크박스 ${index}를 찾을 수 없음`);
                         }
                         
-                        // 운동 세부사항 복원
                         if (item.hasDetails && item.exerciseDetails && Array.isArray(item.exerciseDetails)) {
+                            console.log(`🏃‍♂️ 운동 ${index} 세부사항 로딩 시작 (${item.exerciseDetails.length}개)`);
+                            
                             item.exerciseDetails.forEach((exercise, exerciseIndex) => {
-                                const exerciseCheckbox = document.getElementById(`exercise-${index}-${exerciseIndex}`);
-                                if (exerciseCheckbox) {
-                                    exerciseCheckbox.checked = exercise.completed || false;
-                                    
-                                    // 운동 아이템 완료 스타일 적용
-                                    const exerciseItem = exerciseCheckbox.closest('.exercise-item');
-                                    if (exerciseItem) {
-                                        if (exercise.completed) {
-                                            exerciseItem.classList.add('completed');
-                                        } else {
-                                            exerciseItem.classList.remove('completed');
+                                setTimeout(() => {
+                                    const exerciseCheckbox = document.getElementById(`exercise-${index}-${exerciseIndex}`);
+                                    if (exerciseCheckbox) {
+                                        exerciseCheckbox.checked = exercise.completed || false;
+                                        loadedExercises++;
+                                        console.log(`✅ 운동 체크박스 ${index}-${exerciseIndex} 로드: ${exercise.completed ? '완료' : '미완료'}`);
+                                        
+                                        const exerciseItem = exerciseCheckbox.closest('.exercise-item');
+                                        if (exerciseItem) {
+                                            if (exercise.completed) {
+                                                exerciseItem.classList.add('completed');
+                                            } else {
+                                                exerciseItem.classList.remove('completed');
+                                            }
                                         }
+                                    } else {
+                                        console.warn(`❌ 운동 체크박스 ${index}-${exerciseIndex}를 찾을 수 없음`);
                                     }
-                                }
+                                }, 50 + (exerciseIndex * 20));
                             });
                             
-                            // 운동 진행률 업데이트
-                            updateExerciseProgress(index);
+                            setTimeout(() => {
+                                updateExerciseProgress(index);
+                                console.log(`🏃‍♂️ 운동 ${index} 진행률 업데이트 완료`);
+                            }, 200 + (item.exerciseDetails.length * 30));
                         }
                     });
                     
-                    // 통계 업데이트
-                    updateStats();
+                    setTimeout(() => {
+                        updateStats();
+                        console.log(`📊 통계 업데이트 완료 - 로드된 항목: ${loadedItems}개, 운동: ${loadedExercises}개`);
+                    }, 1000);
+                    
                     console.log(`✅ 체크리스트 로드 완료: ${dateStr}`);
+                    showNotification(`${dateStr} 데이터 로드 완료!`, 'success');
                     return true;
                     
                 } else {
-                    console.log(`📭 데이터 없음: ${dateStr}`);
+                    console.log(`📭 데이터 없음: ${dateStr} (새로운 날짜)`);
+                    showNotification(`${dateStr}은 새로운 날짜입니다`, 'success');
                     return false;
                 }
                 
             } catch (error) {
                 console.error('❌ 체크리스트 로드 실패:', error);
+                console.error('❌ 오류 상세:', error.message);
+                console.error('❌ 스택 트레이스:', error.stack);
+                showNotification('데이터 로딩 실패: ' + error.message, 'error');
                 return false;
             }
         }
 
-        // 체중 관련 함수들
         async function saveWeightData(weight) {
             if (!firebaseInitialized) return false;
 
@@ -1877,20 +1995,31 @@
         }
 
         async function loadWeightData() {
-            if (!firebaseInitialized) return null;
+            if (!firebaseInitialized) {
+                console.warn('❌ Firebase가 초기화되지 않아 체중 데이터를 로드할 수 없습니다');
+                return null;
+            }
 
             try {
                 const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
                 
                 const dateStr = currentDate.toISOString().split('T')[0];
-                const docSnap = await getDoc(doc(db, 'weightTracker', dateStr));
+                console.log(`⚖️ 체중 데이터 로딩 시작: ${dateStr}`);
+                
+                const docRef = doc(db, 'weightTracker', dateStr);
+                const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) {
-                    return docSnap.data().weight;
+                    const weight = docSnap.data().weight;
+                    console.log(`⚖️ 체중 데이터 로드 성공: ${weight}kg`);
+                    return weight;
+                } else {
+                    console.log(`⚖️ 체중 데이터 없음: ${dateStr}`);
+                    return null;
                 }
-                return null;
             } catch (error) {
                 console.error('❌ 체중 데이터 로드 실패:', error);
+                showNotification('체중 데이터 로딩 실패: ' + error.message, 'error');
                 return null;
             }
         }
@@ -1901,10 +2030,9 @@
             try {
                 const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
                 
-                const weightData = [];
                 const today = new Date();
+                console.log('📊 주간 체중 데이터 로딩 시작...');
                 
-                // 오늘부터 6일 전까지 (총 7일) - 오늘이 가장 오른쪽
                 const promises = [];
                 for (let i = 6; i >= 0; i--) {
                     const date = new Date(today);
@@ -1940,7 +2068,90 @@
             }
         }
 
-        // 주간 차트 및 체중 차트 생성 함수들
+        async function savePermanentMemo() {
+            if (!firebaseInitialized) return;
+
+            try {
+                const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+                
+                const memoTextarea = document.getElementById('permanentMemo');
+                if (!memoTextarea) return;
+
+                const memoText = memoTextarea.value.trim();
+                
+                await setDoc(doc(db, 'permanentData', 'memo'), {
+                    content: memoText,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                console.log('📝 영구 메모 저장 완료');
+            } catch (error) {
+                console.error('❌ 메모 저장 실패:', error);
+            }
+        }
+
+        async function loadPermanentMemo() {
+            if (!firebaseInitialized) {
+                console.warn('❌ Firebase가 초기화되지 않아 메모를 로드할 수 없습니다');
+                return;
+            }
+
+            try {
+                const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+                
+                console.log('📝 메모 로딩 시작...');
+                
+                const docRef = doc(db, 'permanentData', 'memo');
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    console.log('📝 메모 데이터 발견:', data);
+                    
+                    const memoTextarea = document.getElementById('permanentMemo');
+                    if (memoTextarea) {
+                        memoTextarea.value = data.content || '';
+                        updateMemoCount();
+                        console.log('📝 메모 로드 완료');
+                        showNotification('메모 로드 완료!', 'success');
+                    } else {
+                        console.warn('❌ 메모 텍스트 영역을 찾을 수 없음');
+                    }
+                } else {
+                    console.log('📭 저장된 메모 없음');
+                }
+                
+            } catch (error) {
+                console.error('❌ 메모 로드 실패:', error);
+                showNotification('메모 로딩 실패: ' + error.message, 'error');
+            }
+        }
+
+        function updateMemoCount() {
+            const memoTextarea = document.getElementById('permanentMemo');
+            const memoCharCount = document.getElementById('memoCharCount');
+            
+            if (memoTextarea && memoCharCount) {
+                let length = memoTextarea.value.length;
+                
+                if (length > 1000) {
+                    memoTextarea.value = memoTextarea.value.substring(0, 1000);
+                    length = 1000;
+                }
+                
+                memoCharCount.textContent = length;
+                
+                if (length > 900) {
+                    memoCharCount.style.color = '#ef4444';
+                } else if (length > 800) {
+                    memoCharCount.style.color = '#f59e0b';
+                } else {
+                    memoCharCount.style.color = '#6b7280';
+                }
+            }
+        }
+
+        // 차트 관련 함수들
         function createWeightChart(weightData) {
             const chartWrapper = document.getElementById('weightChartWrapper');
             if (!chartWrapper) return;
@@ -2001,13 +2212,11 @@
             const barsContainer = document.createElement('div');
             barsContainer.className = 'weight-bars-container';
 
-            // 모든 7일의 데이터를 표시 (체중이 없는 날도 포함)
             weightData.forEach((item, index) => {
                 const barItem = document.createElement('div');
                 barItem.className = 'weight-bar-item';
 
                 if (item.weight === null) {
-                    // 체중 데이터가 없는 경우
                     const barMain = document.createElement('div');
                     barMain.className = 'weight-bar-main';
                     barMain.style.height = '20%';
@@ -2027,7 +2236,6 @@
                     barItem.appendChild(barMain);
                     barItem.appendChild(dayLabel);
                 } else {
-                    // 체중 데이터가 있는 경우 기존 로직
                     let heightPercent;
                     if (validData.length === 1) {
                         heightPercent = 75;
@@ -2044,7 +2252,6 @@
                     if (item.isToday) {
                         barMain.classList.add('today');
                     } else if (validData.length > 1) {
-                        // 이전 데이터와 비교 (validData에서의 인덱스 찾기)
                         const validIndex = validData.findIndex(d => d.date === item.date);
                         let weightChangeFromPrev = 0;
                         if (validIndex > 0) {
@@ -2075,7 +2282,6 @@
                     valueLabel.textContent = `${item.weight.toFixed(1)}kg`;
                     barMain.appendChild(valueLabel);
 
-                    // 변화량 표시 (이전 유효한 데이터와 비교)
                     const validIndex = validData.findIndex(d => d.date === item.date);
                     if (validIndex > 0) {
                         const prevWeight = validData[validIndex - 1].weight;
@@ -2172,18 +2378,17 @@
             try {
                 console.log('📊 주간차트 생성 시작...');
                 
-                // 즉시 차트 골격 생성 - 오늘부터 6일 전까지 (총 7일)
                 weeklyChart.innerHTML = '';
                 const fragment = document.createDocumentFragment();
                 
                 for (let i = 6; i >= 0; i--) {
                     const date = new Date(today);
                     date.setDate(today.getDate() - i);
-                    const isToday = i === 0; // i가 0일 때가 오늘
+                    const isToday = i === 0;
                     
                     const dayBar = document.createElement('div');
                     dayBar.className = `day-bar ${isToday ? 'today' : ''}`;
-                    dayBar.setAttribute('data-day-index', 6 - i); // 인덱스는 0부터 6까지
+                    dayBar.setAttribute('data-day-index', 6 - i);
                     dayBar.setAttribute('data-date', date.toISOString().split('T')[0]);
 
                     const barContainer = document.createElement('div');
@@ -2211,7 +2416,6 @@
                 weeklyChart.appendChild(fragment);
                 console.log('📊 주간차트 골격 생성 완료 (최근 7일)');
                 
-                // 백그라운드에서 데이터 로딩
                 if (firebaseInitialized) {
                     loadWeeklyData().catch(error => {
                         console.error('주간 데이터 로딩 실패:', error);
@@ -2239,13 +2443,12 @@
 
                 console.log('📊 주간 데이터 로딩 시작...');
 
-                // 최근 7일 데이터 로딩 (오늘부터 6일 전까지)
                 const promises = [];
                 for (let i = 6; i >= 0; i--) {
                     const date = new Date(today);
                     date.setDate(today.getDate() - i);
                     const dateStr = date.toISOString().split('T')[0];
-                    const dayIndex = 6 - i; // 차트에서의 인덱스
+                    const dayIndex = 6 - i;
                     
                     promises.push(
                         getDoc(doc(db, 'healthTracker', dateStr))
@@ -2277,12 +2480,10 @@
                             const completedTasks = data.schedule.filter(task => task.completed).length;
                             dayPercentage = Math.round((completedTasks / data.schedule.length) * 100);
                         } else if (data.completionRate !== undefined) {
-                            // 새로운 데이터 구조에서 완료율 직접 가져오기
                             dayPercentage = data.completionRate;
                         }
                     }
 
-                    // 해당 날짜의 바 찾기
                     const dayBar = weeklyChart.querySelector(`[data-date="${dateStr}"]`);
                     if (dayBar) {
                         const barFill = dayBar.querySelector('.bar-fill');
@@ -2294,7 +2495,6 @@
                         }
                     }
 
-                    // 평균 계산에 포함 (미래 날짜 제외)
                     if (date <= today) {
                         totalPercentage += dayPercentage;
                         validDays++;
@@ -2313,82 +2513,6 @@
             }
         }
 
-        // 메모 관련 함수들
-        async function savePermanentMemo() {
-            if (!firebaseInitialized) return;
-
-            try {
-                const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-                
-                const memoTextarea = document.getElementById('permanentMemo');
-                if (!memoTextarea) return;
-
-                const memoText = memoTextarea.value.trim();
-                
-                await setDoc(doc(db, 'permanentData', 'memo'), {
-                    content: memoText,
-                    lastUpdated: new Date().toISOString()
-                });
-
-                console.log('📝 영구 메모 저장 완료');
-            } catch (error) {
-                console.error('❌ 메모 저장 실패:', error);
-            }
-        }
-
-        async function loadPermanentMemo() {
-            if (!firebaseInitialized) return;
-
-            try {
-                const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
-                
-                console.log('📝 메모 로딩 시작...');
-                
-                const docSnap = await getDoc(doc(db, 'permanentData', 'memo'));
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    
-                    const memoTextarea = document.getElementById('permanentMemo');
-                    if (memoTextarea) {
-                        memoTextarea.value = data.content || '';
-                        updateMemoCount();
-                        console.log('📝 메모 로드 완료');
-                    }
-                } else {
-                    console.log('📭 저장된 메모 없음');
-                }
-                
-            } catch (error) {
-                console.error('❌ 메모 로드 실패:', error);
-            }
-        }
-
-        function updateMemoCount() {
-            const memoTextarea = document.getElementById('permanentMemo');
-            const memoCharCount = document.getElementById('memoCharCount');
-            
-            if (memoTextarea && memoCharCount) {
-                let length = memoTextarea.value.length;
-                
-                if (length > 1000) {
-                    memoTextarea.value = memoTextarea.value.substring(0, 1000);
-                    length = 1000;
-                }
-                
-                memoCharCount.textContent = length;
-                
-                if (length > 900) {
-                    memoCharCount.style.color = '#ef4444';
-                } else if (length > 800) {
-                    memoCharCount.style.color = '#f59e0b';
-                } else {
-                    memoCharCount.style.color = '#6b7280';
-                }
-            }
-        }
-
-        // 이벤트 리스너 및 UI 업데이트 함수들
         function showNotification(message, type = 'success') {
             const notification = document.getElementById('notification');
             if (notification) {
@@ -2442,6 +2566,10 @@
 
             if (prevDayBtn) {
                 prevDayBtn.addEventListener('click', async () => {
+                    if (saveQueue.size > 0) {
+                        await processSaveQueue();
+                    }
+                    
                     currentDate.setDate(currentDate.getDate() - 1);
                     generateChecklist();
                     if (firebaseInitialized) {
@@ -2455,6 +2583,10 @@
             
             if (nextDayBtn) {
                 nextDayBtn.addEventListener('click', async () => {
+                    if (saveQueue.size > 0) {
+                        await processSaveQueue();
+                    }
+                    
                     currentDate.setDate(currentDate.getDate() + 1);
                     generateChecklist();
                     if (firebaseInitialized) {
@@ -2466,28 +2598,24 @@
                 });
             }
 
-            // 메모 이벤트
             const memoTextarea = document.getElementById('permanentMemo');
             const memoSaveBtn = document.getElementById('memoSaveBtn');
             
             if (memoTextarea) {
                 memoTextarea.addEventListener('input', updateMemoCount);
                 
-                let memoSaveTimeout;
                 memoTextarea.addEventListener('input', () => {
-                    clearTimeout(memoSaveTimeout);
-                    memoSaveTimeout = setTimeout(() => {
-                        if (firebaseInitialized) {
-                            savePermanentMemo();
-                        }
-                    }, 3000);
+                    if (firebaseInitialized) {
+                        queueSave('memo');
+                    }
                 });
             }
             
             if (memoSaveBtn) {
                 memoSaveBtn.addEventListener('click', () => {
                     if (firebaseInitialized) {
-                        savePermanentMemo();
+                        queueSave('memo');
+                        processSaveQueue();
                         memoSaveBtn.textContent = '✅ 저장됨';
                         memoSaveBtn.classList.add('saved');
                         setTimeout(() => {
@@ -2498,7 +2626,6 @@
                 });
             }
 
-            // 체중 입력 이벤트
             const weightInput = document.getElementById('weightInput');
             const weightSaveBtn = document.getElementById('weightSaveBtn');
 
@@ -2512,19 +2639,19 @@
                     }
 
                     if (firebaseInitialized) {
-                        const success = await saveWeightData(weight);
-                        if (success) {
-                            weightSaveBtn.textContent = '✅ 저장됨';
-                            weightSaveBtn.classList.add('saved');
-                            showNotification('체중이 기록되었습니다!', 'success');
-                            
-                            await updateWeightDisplay();
-                            
-                            setTimeout(() => {
-                                weightSaveBtn.textContent = '💾 기록';
-                                weightSaveBtn.classList.remove('saved');
-                            }, 2000);
-                        }
+                        queueSave('weight', weight);
+                        await processSaveQueue();
+                        
+                        weightSaveBtn.textContent = '✅ 저장됨';
+                        weightSaveBtn.classList.add('saved');
+                        showNotification('체중이 기록되었습니다!', 'success');
+                        
+                        await updateWeightDisplay();
+                        
+                        setTimeout(() => {
+                            weightSaveBtn.textContent = '💾 기록';
+                            weightSaveBtn.classList.remove('saved');
+                        }, 2000);
                     } else {
                         showNotification('Firebase 연결이 필요합니다', 'error');
                     }
@@ -2534,7 +2661,7 @@
             if (weightInput) {
                 weightInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
-                        weightSaveBtn.click();
+                        if (weightSaveBtn) weightSaveBtn.click();
                     }
                 });
             }
@@ -2543,8 +2670,12 @@
         }
 
         function startTimeUpdater() {
-            updateCurrentTimeDisplay();
-            updateTaskHighlight();
+            try {
+                updateCurrentTimeDisplay();
+                updateTaskHighlight();
+            } catch (error) {
+                console.error('초기 시간 업데이트 오류:', error);
+            }
             
             setInterval(() => {
                 try {
@@ -2556,53 +2687,92 @@
             }, 60000);
         }
 
-        // 메인 초기화 함수
         async function initializeApp() {
             console.log('🚀 앱 초기화 시작');
             
             try {
-                // 1. 기본 UI 먼저 초기화 (즉시 실행)
+                console.log('🎛️ 기본 UI 초기화 중...');
                 setupEventListeners();
-                updateCurrentTimeDisplay();
                 generateChecklist();
                 
-                // 2. 주간 차트 먼저 골격 생성 (Firebase 없이도 작동)
+                setTimeout(() => {
+                    try {
+                        updateCurrentTimeDisplay();
+                        console.log('⏰ 시간 표시 초기화 완료');
+                    } catch (error) {
+                        console.error('시간 표시 초기화 오류:', error);
+                    }
+                }, 100);
+                
+                console.log('📊 주간 차트 초기화 중...');
                 await createWeeklyChart();
                 
-                // 3. Firebase 초기화 (백그라운드)
                 console.log('🔄 Firebase 초기화 시도...');
                 const firebaseConnected = await initializeFirebase();
                 
                 if (firebaseConnected) {
                     console.log('✅ Firebase 연결 성공 - 데이터 로딩 시작');
-                    showNotification('Firebase 연결 완료! 데이터를 로딩합니다.', 'success');
                     
-                    // 4. Firebase 연결 후 실제 데이터 로딩
-                    const loadingPromises = [
-                        loadChecklistData().catch(e => console.error('체크리스트 로딩 실패:', e)),
-                        loadPermanentMemo().catch(e => console.error('메모 로딩 실패:', e)),
-                        updateWeightDisplay().catch(e => console.error('체중 데이터 로딩 실패:', e)),
-                        loadWeeklyData().catch(e => console.error('주간차트 데이터 로딩 실패:', e))
-                    ];
+                    console.log('📂 체크리스트 데이터 로딩 중...');
+                    try {
+                        const checklistLoaded = await loadChecklistData();
+                        console.log(`📂 체크리스트 로딩 결과: ${checklistLoaded ? '성공' : '데이터 없음'}`);
+                    } catch (e) {
+                        console.error('체크리스트 로딩 실패:', e);
+                        showNotification('체크리스트 로딩 실패', 'error');
+                    }
                     
-                    await Promise.allSettled(loadingPromises);
+                    console.log('📝 메모 데이터 로딩 중...');
+                    try {
+                        await loadPermanentMemo();
+                        console.log('📝 메모 로딩 완료');
+                    } catch (e) {
+                        console.error('메모 로딩 실패:', e);
+                        showNotification('메모 로딩 실패', 'error');
+                    }
                     
-                    console.log('✅ 모든 데이터 로딩 완료');
+                    console.log('⚖️ 체중 데이터 로딩 중...');
+                    try {
+                        await updateWeightDisplay();
+                        console.log('⚖️ 체중 데이터 로딩 완료');
+                    } catch (e) {
+                        console.error('체중 데이터 로딩 실패:', e);
+                        showNotification('체중 데이터 로딩 실패', 'error');
+                    }
+                    
+                    console.log('📊 주간 데이터 로딩 중...');
+                    try {
+                        await loadWeeklyData();
+                        console.log('📊 주간 데이터 로딩 완료');
+                    } catch (e) {
+                        console.error('주간 데이터 로딩 실패:', e);
+                        showNotification('주간 데이터 로딩 실패', 'error');
+                    }
+                    
+                    console.log('✅ 모든 데이터 로딩 프로세스 완료');
                     showNotification('모든 데이터 로딩 완료!', 'success');
+                    
                 } else {
                     console.warn('⚠️ Firebase 연결 실패 - 로컬 모드로 동작');
-                    showNotification('로컬 모드로 동작합니다 (데이터 저장 불가)', 'error');
-                    
-                    // Firebase 없이도 기본 차트와 테스트 데이터 표시
-                    showTestWeeklyData();
+                    showNotification('오프라인 모드로 동작합니다', 'error');
                     
                     const weightChartWrapper = document.getElementById('weightChartWrapper');
                     if (weightChartWrapper) {
                         weightChartWrapper.innerHTML = `
                             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;">
-                                <div style="font-size: 3rem; margin-bottom: 16px;">⚖️</div>
-                                <div style="font-size: 1rem; font-weight: 600;">Firebase 연결 필요</div>
-                                <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">체중 데이터를 저장하려면 Firebase 연결이 필요합니다</div>
+                                <div style="font-size: 3rem; margin-bottom: 16px;">🔌</div>
+                                <div style="font-size: 1rem; font-weight: 600;">오프라인 모드</div>
+                                <div style="font-size: 0.875rem; color: #94a3b8; margin-top: 8px;">인터넷 연결을 확인해주세요</div>
+                            </div>
+                        `;
+                    }
+                    
+                    const weeklyChart = document.getElementById('weeklyChart');
+                    if (weeklyChart) {
+                        weeklyChart.innerHTML = `
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #64748b;">
+                                <div style="font-size: 2rem; margin-bottom: 8px;">📊</div>
+                                <div style="font-size: 0.9rem; font-weight: 600;">오프라인 모드</div>
                             </div>
                         `;
                     }
@@ -2611,28 +2781,89 @@
                 console.log('✅ 앱 초기화 완료');
                 
             } catch (error) {
-                console.error('❌ 앱 초기화 오류:', error);
-                showNotification('앱 초기화 중 오류가 발생했습니다', 'error');
+                console.error('❌ 앱 초기화 치명적 오류:', error);
+                console.error('❌ 오류 상세:', error.message);
+                console.error('❌ 스택 트레이스:', error.stack);
+                showNotification('앱 초기화 중 오류 발생: ' + error.message, 'error');
                 
-                // 오류가 발생해도 기본 UI는 동작하도록
                 try {
+                    console.log('🆘 기본 UI 복구 시도...');
                     setupEventListeners();
-                    updateCurrentTimeDisplay();
                     generateChecklist();
                     await createWeeklyChart();
-                    showTestWeeklyData();
+                    
+                    setTimeout(() => {
+                        try {
+                            updateCurrentTimeDisplay();
+                            console.log('🆘 기본 UI 복구 성공');
+                            showNotification('기본 기능만 사용 가능합니다', 'error');
+                        } catch (timeError) {
+                            console.error('시간 표시 복구도 실패:', timeError);
+                        }
+                    }, 200);
                 } catch (fallbackError) {
-                    console.error('기본 UI 초기화도 실패:', fallbackError);
+                    console.error('🆘 기본 UI 복구도 실패:', fallbackError);
+                    showNotification('앱 초기화 완전 실패', 'error');
                 }
             }
         }
 
-        // DOM 로드 완료 시 초기화
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('📱 DOM 로드 완료 - 앱 시작');
             await initializeApp();
-            startTimeUpdater();
+            
+            setTimeout(() => {
+                try {
+                    startTimeUpdater();
+                } catch (error) {
+                    console.error('시간 업데이터 시작 실패:', error);
+                }
+            }, 1000);
         });
+
+        window.addEventListener('beforeunload', () => {
+            if (saveQueue.size > 0) {
+                navigator.sendBeacon && processSaveQueue();
+            }
+        });
+
+        window.addEventListener('error', (event) => {
+            console.error('🔥 전역 JavaScript 오류:', event.error);
+            showNotification('JavaScript 오류가 발생했습니다', 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('🔥 처리되지 않은 Promise 거부:', event.reason);
+            showNotification('비동기 작업 오류가 발생했습니다', 'error');
+        });
+
+        window.debugApp = {
+            firebaseStatus: () => firebaseInitialized,
+            currentDate: () => currentDate.toISOString().split('T')[0],
+            saveQueueSize: () => saveQueue.size,
+            forceSave: () => processSaveQueue(),
+            testConnection: () => testFirebaseConnection(),
+            reloadData: async () => {
+                if (firebaseInitialized) {
+                    console.log('🔄 데이터 강제 재로딩...');
+                    await loadChecklistData();
+                    await loadPermanentMemo();
+                    await updateWeightDisplay();
+                    await loadWeeklyData();
+                    console.log('✅ 데이터 재로딩 완료');
+                } else {
+                    console.warn('❌ Firebase가 초기화되지 않음');
+                }
+            }
+        };
+
+        console.log('📋 디버깅 도구 사용법:');
+        console.log('- window.debugApp.firebaseStatus() : Firebase 연결 상태');
+        console.log('- window.debugApp.currentDate() : 현재 선택된 날짜');
+        console.log('- window.debugApp.saveQueueSize() : 저장 대기 중인 항목 수');
+        console.log('- window.debugApp.forceSave() : 강제 저장');
+        console.log('- window.debugApp.testConnection() : 연결 테스트');
+        console.log('- window.debugApp.reloadData() : 데이터 강제 재로딩');
     </script>
 </body>
 </html>
