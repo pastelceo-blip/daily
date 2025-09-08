@@ -1158,6 +1158,7 @@
         let firebaseInitialized = false;
         let currentDate = new Date();
         let isInitializing = false;
+        let lastCheckedDate = null; // 날짜 변경 감지용
         
         let saveQueue = new Map();
         let isSaving = false;
@@ -1167,6 +1168,77 @@
 
         const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
         const dayNamesShort = ['일', '월', '화', '수', '목', '금', '토'];
+
+        // ============ 날짜 관리 시스템 개선 ============
+        
+        // 한국 시간대 기준으로 날짜 정규화
+        function normalizeDate(date = new Date()) {
+            // 한국 시간대로 변환
+            const koreanDate = new Date(date.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+            // 시간 부분을 00:00:00으로 설정
+            koreanDate.setHours(0, 0, 0, 0);
+            return koreanDate;
+        }
+
+        // 현재 한국 날짜 반환
+        function getCurrentKoreanDate() {
+            return normalizeDate();
+        }
+
+        // 날짜 문자열을 안전하게 생성 (YYYY-MM-DD 형식)
+        function getDateString(date) {
+            const normalized = normalizeDate(date);
+            return normalized.toISOString().split('T')[0];
+        }
+
+        // 날짜 초기화
+        function initializeDate() {
+            currentDate = getCurrentKoreanDate();
+            lastCheckedDate = getCurrentKoreanDate();
+            console.log(`📅 앱 시작 날짜: ${getDateString(currentDate)}`);
+        }
+
+        // 날짜 변경 감지 및 자동 갱신
+        function checkDateChange() {
+            const now = getCurrentKoreanDate();
+            const currentDateStr = getDateString(currentDate);
+            const todayStr = getDateString(now);
+            const lastCheckedStr = getDateString(lastCheckedDate);
+            
+            // 현재 보고 있는 날짜가 "오늘"이었는데 날짜가 바뀐 경우
+            if (currentDateStr === lastCheckedStr && 
+                currentDateStr !== todayStr && 
+                lastCheckedDate < now) {
+                
+                console.log('🕛 자정 경계 감지 - 날짜 자동 갱신');
+                console.log(`  이전: ${currentDateStr} → 현재: ${todayStr}`);
+                
+                // 자동으로 새 날짜로 이동
+                currentDate = normalizeDate(now);
+                
+                // UI 즉시 갱신
+                generateChecklist();
+                if (firebaseInitialized) {
+                    setTimeout(async () => {
+                        await Promise.all([
+                            loadChecklistData(),
+                            updateWeightDisplay()
+                        ]);
+                    }, 500);
+                }
+                
+                showNotification('새로운 날이 시작되었습니다! 🌅', 'success');
+            }
+            
+            lastCheckedDate = normalizeDate(now);
+        }
+
+        // 안전한 날짜 키 생성
+        function getSafeDateKey(date = currentDate) {
+            return getDateString(date);
+        }
+
+        // ============ 기존 코드 계속 ============
 
         const schedules = {
             weekday: [
@@ -1294,22 +1366,26 @@
         }
 
         function formatDate(date) {
-            const today = new Date();
+            const today = getCurrentKoreanDate();
             const yesterday = new Date(today);
             yesterday.setDate(today.getDate() - 1);
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);
             
-            const dateStr = date.toDateString();
+            const normalizedDate = normalizeDate(date);
+            const dateStr = normalizedDate.toDateString();
+            const todayStr = today.toDateString();
+            const yesterdayStr = yesterday.toDateString();
+            const tomorrowStr = tomorrow.toDateString();
             
-            if (dateStr === today.toDateString()) {
-                return `오늘 (${date.getMonth() + 1}/${date.getDate()})`;
-            } else if (dateStr === yesterday.toDateString()) {
-                return `어제 (${date.getMonth() + 1}/${date.getDate()})`;
-            } else if (dateStr === tomorrow.toDateString()) {
-                return `내일 (${date.getMonth() + 1}/${date.getDate()})`;
+            if (dateStr === todayStr) {
+                return `오늘 (${normalizedDate.getMonth() + 1}/${normalizedDate.getDate()})`;
+            } else if (dateStr === yesterdayStr) {
+                return `어제 (${normalizedDate.getMonth() + 1}/${normalizedDate.getDate()})`;
+            } else if (dateStr === tomorrowStr) {
+                return `내일 (${normalizedDate.getMonth() + 1}/${normalizedDate.getDate()})`;
             } else {
-                return `${dayNames[date.getDay()]} (${date.getMonth() + 1}/${date.getDate()})`;
+                return `${dayNames[normalizedDate.getDay()]} (${normalizedDate.getMonth() + 1}/${normalizedDate.getDate()})`;
             }
         }
 
@@ -1332,8 +1408,10 @@
         }
 
         function getCurrentTime() {
+            // 한국 시간 기준으로 현재 시간 계산
             const now = new Date();
-            return now.getHours() + (now.getMinutes() / 60);
+            const koreanTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+            return koreanTime.getHours() + (koreanTime.getMinutes() / 60);
         }
 
         function findCurrentAndNextTasks() {
@@ -1360,8 +1438,10 @@
 
         function updateCurrentTimeDisplay() {
             try {
+                // 한국 시간 표시
                 const now = new Date();
-                const timeStr = now.toLocaleTimeString('ko-KR', { 
+                const koreanTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+                const timeStr = koreanTime.toLocaleTimeString('ko-KR', { 
                     hour: '2-digit', 
                     minute: '2-digit',
                     hour12: false 
@@ -1423,13 +1503,12 @@
             }
         }
 
-        // 저장 시스템 (수정됨)
+        // 저장 시스템 (날짜 관리 개선)
         function queueSave(type, data = null) {
             const now = Date.now();
-            const currentDateStr = currentDate.toISOString().split('T')[0];
-            saveQueue.set(type, { data, timestamp: now, targetDate: currentDateStr });
+            saveQueue.set(type, { data, timestamp: now });
             
-            console.log(`📝 저장 큐에 추가: ${type} (날짜: ${currentDateStr})`);
+            console.log(`📝 저장 큐에 추가: ${type} (날짜: ${getSafeDateKey()})`);
             
             if (window.saveTimeout) {
                 clearTimeout(window.saveTimeout);
@@ -1455,10 +1534,7 @@
             showSaveIndicator('saving');
             
             try {
-                console.log(`💾 저장 처리 시작 (${saveQueue.size}개 항목) - 대상 날짜: ${currentDate.toISOString().split('T')[0]}`);
-                
-                // 현재 표시되고 있는 날짜를 저장 시점에 고정
-                const targetDate = new Date(currentDate);
+                console.log(`💾 저장 처리 시작 (${saveQueue.size}개 항목, 날짜: ${getSafeDateKey()})`);
                 
                 const savePromises = [];
                 const queueCopy = new Map(saveQueue);
@@ -1467,14 +1543,14 @@
                 for (const [type, { data }] of queueCopy) {
                     switch (type) {
                         case 'checklist':
-                            savePromises.push(saveChecklistData(targetDate));
+                            savePromises.push(saveChecklistData());
                             break;
                         case 'memo':
-                            savePromises.push(savePermanentMemo()); // 메모는 날짜와 무관
+                            savePromises.push(savePermanentMemo());
                             break;
                         case 'weight':
                             if (data) {
-                                savePromises.push(saveWeightData(data, targetDate));
+                                savePromises.push(saveWeightData(data));
                             }
                             break;
                     }
@@ -1801,20 +1877,15 @@
             }
         }
 
-        // Firebase 데이터 함수들 (수정됨)
-        async function saveChecklistData(targetDate = null) {
+        // Firebase 데이터 함수들 (날짜 관리 개선)
+        async function saveChecklistData() {
             if (!firebaseInitialized) return false;
 
             try {
                 const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
                 
-                // targetDate가 제공되지 않으면 currentDate 사용, 하지만 새로운 Date 객체로 복사
-                const saveDate = targetDate ? new Date(targetDate) : new Date(currentDate);
-                const dateStr = saveDate.toISOString().split('T')[0];
-                
-                console.log(`💾 체크리스트 저장 시작 - 날짜: ${dateStr}`);
-                
-                const schedule = getScheduleForDate(saveDate); // saveDate 사용
+                const dateKey = getSafeDateKey(currentDate);  // 개선된 날짜 키 사용
+                const schedule = getScheduleForDate(currentDate);
                 
                 const dailyData = schedule.map((item, index) => {
                     const checkbox = document.getElementById(`checkbox-${index}`);
@@ -1859,8 +1930,8 @@
                 };
 
                 const dataToSave = {
-                    date: dateStr,
-                    dayOfWeek: dayNames[saveDate.getDay()],
+                    date: dateKey,
+                    dayOfWeek: dayNames[currentDate.getDay()],
                     schedule: dailyData,
                     stats: stats,
                     completionRate: completionRate,
@@ -1870,9 +1941,9 @@
                     timestamp: Date.now()
                 };
 
-                await setDoc(doc(db, 'healthTracker', dateStr), dataToSave);
+                await setDoc(doc(db, 'healthTracker', dateKey), dataToSave);
 
-                console.log(`✅ 체크리스트 저장 완료: ${dateStr} (완료율: ${completionRate}%)`);
+                console.log(`✅ 체크리스트 저장 완료: ${dateKey} (완료율: ${completionRate}%)`);
                 return true;
 
             } catch (error) {
@@ -1890,11 +1961,11 @@
             try {
                 const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
                 
-                const dateStr = currentDate.toISOString().split('T')[0];
-                console.log(`📂 체크리스트 로딩 시작: ${dateStr}`);
+                const dateKey = getSafeDateKey(currentDate);  // 개선된 날짜 키 사용
+                console.log(`📂 체크리스트 로딩 시작: ${dateKey}`);
                 
-                const docRef = doc(db, 'healthTracker', dateStr);
-                console.log(`📂 문서 참조 생성: healthTracker/${dateStr}`);
+                const docRef = doc(db, 'healthTracker', dateKey);
+                console.log(`📂 문서 참조 생성: healthTracker/${dateKey}`);
                 
                 const docSnap = await getDoc(docRef);
                 console.log(`📂 문서 읽기 완료. 존재 여부: ${docSnap.exists()}`);
@@ -1904,11 +1975,11 @@
                     console.log(`📂 문서 데이터:`, data);
                     
                     if (!data.schedule || !Array.isArray(data.schedule)) {
-                        console.warn(`📭 잘못된 데이터 구조: ${dateStr}`, data);
+                        console.warn(`📭 잘못된 데이터 구조: ${dateKey}`, data);
                         return false;
                     }
                     
-                    console.log(`📂 유효한 데이터 발견: ${dateStr} (${data.schedule.length}개 항목)`);
+                    console.log(`📂 유효한 데이터 발견: ${dateKey} (${data.schedule.length}개 항목)`);
                     
                     await new Promise(resolve => setTimeout(resolve, 300));
                     
@@ -1962,13 +2033,13 @@
                         console.log(`📊 통계 업데이트 완료 - 로드된 항목: ${loadedItems}개, 운동: ${loadedExercises}개`);
                     }, 1000);
                     
-                    console.log(`✅ 체크리스트 로드 완료: ${dateStr}`);
-                    showNotification(`${dateStr} 데이터 로드 완료!`, 'success');
+                    console.log(`✅ 체크리스트 로드 완료: ${dateKey}`);
+                    showNotification(`${dateKey} 데이터 로드 완료!`, 'success');
                     return true;
                     
                 } else {
-                    console.log(`📭 데이터 없음: ${dateStr} (새로운 날짜)`);
-                    showNotification(`${dateStr}은 새로운 날짜입니다`, 'success');
+                    console.log(`📭 데이터 없음: ${dateKey} (새로운 날짜)`);
+                    showNotification(`${dateKey}은 새로운 날짜입니다`, 'success');
                     return false;
                 }
                 
@@ -1981,25 +2052,21 @@
             }
         }
 
-        async function saveWeightData(weight, targetDate = null) {
+        async function saveWeightData(weight) {
             if (!firebaseInitialized) return false;
 
             try {
                 const { setDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
                 
-                // targetDate가 제공되지 않으면 currentDate 사용, 하지만 새로운 Date 객체로 복사
-                const saveDate = targetDate ? new Date(targetDate) : new Date(currentDate);
-                const dateStr = saveDate.toISOString().split('T')[0];
+                const dateKey = getSafeDateKey(currentDate);  // 개선된 날짜 키 사용
                 
-                console.log(`⚖️ 체중 데이터 저장 시작 - 날짜: ${dateStr}, 체중: ${weight}kg`);
-                
-                await setDoc(doc(db, 'weightTracker', dateStr), {
-                    date: dateStr,
+                await setDoc(doc(db, 'weightTracker', dateKey), {
+                    date: dateKey,
                     weight: parseFloat(weight),
                     timestamp: new Date().toISOString()
                 });
 
-                console.log(`✅ 체중 데이터 저장 완료: ${dateStr} - ${weight}kg`);
+                console.log('✅ 체중 데이터 저장 완료:', weight + 'kg');
                 return true;
             } catch (error) {
                 console.error('❌ 체중 데이터 저장 실패:', error);
@@ -2016,10 +2083,10 @@
             try {
                 const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
                 
-                const dateStr = currentDate.toISOString().split('T')[0];
-                console.log(`⚖️ 체중 데이터 로딩 시작: ${dateStr}`);
+                const dateKey = getSafeDateKey(currentDate);  // 개선된 날짜 키 사용
+                console.log(`⚖️ 체중 데이터 로딩 시작: ${dateKey}`);
                 
-                const docRef = doc(db, 'weightTracker', dateStr);
+                const docRef = doc(db, 'weightTracker', dateKey);
                 const docSnap = await getDoc(docRef);
                 
                 if (docSnap.exists()) {
@@ -2027,7 +2094,7 @@
                     console.log(`⚖️ 체중 데이터 로드 성공: ${weight}kg`);
                     return weight;
                 } else {
-                    console.log(`⚖️ 체중 데이터 없음: ${dateStr}`);
+                    console.log(`⚖️ 체중 데이터 없음: ${dateKey}`);
                     return null;
                 }
             } catch (error) {
@@ -2043,30 +2110,31 @@
             try {
                 const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
                 
-                const today = new Date();
+                const today = getCurrentKoreanDate();  // 한국 시간 기준
                 console.log('📊 주간 체중 데이터 로딩 시작...');
                 
                 const promises = [];
                 for (let i = 6; i >= 0; i--) {
                     const date = new Date(today);
                     date.setDate(today.getDate() - i);
-                    const dateStr = date.toISOString().split('T')[0];
+                    const normalizedDate = normalizeDate(date);
+                    const dateKey = getDateString(normalizedDate);
                     
                     promises.push(
-                        getDoc(doc(db, 'weightTracker', dateStr))
+                        getDoc(doc(db, 'weightTracker', dateKey))
                             .then(docSnap => ({
-                                date: dateStr,
-                                dateObj: new Date(date),
+                                date: dateKey,
+                                dateObj: normalizedDate,
                                 weight: docSnap.exists() ? docSnap.data().weight : null,
-                                day: dayNamesShort[date.getDay()],
-                                isToday: dateStr === today.toISOString().split('T')[0]
+                                day: dayNamesShort[normalizedDate.getDay()],
+                                isToday: dateKey === getDateString(today)
                             }))
                             .catch(() => ({
-                                date: dateStr,
-                                dateObj: new Date(date),
+                                date: dateKey,
+                                dateObj: normalizedDate,
                                 weight: null,
-                                day: dayNamesShort[date.getDay()],
-                                isToday: dateStr === today.toISOString().split('T')[0]
+                                day: dayNamesShort[normalizedDate.getDay()],
+                                isToday: dateKey === getDateString(today)
                             }))
                     );
                 }
@@ -2164,7 +2232,7 @@
             }
         }
 
-        // 차트 관련 함수들
+        // 차트 관련 함수들 (날짜 관리 개선)
         function createWeightChart(weightData) {
             const chartWrapper = document.getElementById('weightChartWrapper');
             if (!chartWrapper) return;
@@ -2219,7 +2287,7 @@
                 weightRange = chartMaxWeight - chartMinWeight;
             }
 
-            const today = new Date().toISOString().split('T')[0];
+            const todayStr = getDateString(getCurrentKoreanDate());
             const avgWeight = weights.reduce((a, b) => a + b) / weights.length;
 
             const barsContainer = document.createElement('div');
@@ -2386,7 +2454,7 @@
             const weeklyChart = document.getElementById('weeklyChart');
             if (!weeklyChart) return;
 
-            const today = new Date();
+            const today = getCurrentKoreanDate();  // 한국 시간 기준
 
             try {
                 console.log('📊 주간차트 생성 시작...');
@@ -2397,12 +2465,13 @@
                 for (let i = 6; i >= 0; i--) {
                     const date = new Date(today);
                     date.setDate(today.getDate() - i);
+                    const normalizedDate = normalizeDate(date);
                     const isToday = i === 0;
                     
                     const dayBar = document.createElement('div');
                     dayBar.className = `day-bar ${isToday ? 'today' : ''}`;
                     dayBar.setAttribute('data-day-index', 6 - i);
-                    dayBar.setAttribute('data-date', date.toISOString().split('T')[0]);
+                    dayBar.setAttribute('data-date', getDateString(normalizedDate));
 
                     const barContainer = document.createElement('div');
                     barContainer.className = 'bar-container';
@@ -2417,7 +2486,7 @@
 
                     const dayLabel = document.createElement('div');
                     dayLabel.className = 'day-label';
-                    dayLabel.textContent = dayNamesShort[date.getDay()];
+                    dayLabel.textContent = dayNamesShort[normalizedDate.getDay()];
 
                     barContainer.appendChild(barFill);
                     barContainer.appendChild(percentage);
@@ -2447,7 +2516,7 @@
             try {
                 const { getDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
                 
-                const today = new Date();
+                const today = getCurrentKoreanDate();  // 한국 시간 기준
                 const weeklyChart = document.getElementById('weeklyChart');
                 if (!weeklyChart) return;
 
@@ -2460,22 +2529,23 @@
                 for (let i = 6; i >= 0; i--) {
                     const date = new Date(today);
                     date.setDate(today.getDate() - i);
-                    const dateStr = date.toISOString().split('T')[0];
+                    const normalizedDate = normalizeDate(date);
+                    const dateKey = getDateString(normalizedDate);
                     const dayIndex = 6 - i;
                     
                     promises.push(
-                        getDoc(doc(db, 'healthTracker', dateStr))
+                        getDoc(doc(db, 'healthTracker', dateKey))
                             .then(docSnap => ({ 
                                 dayIndex, 
-                                date, 
-                                dateStr, 
+                                date: normalizedDate, 
+                                dateKey, 
                                 docSnap,
                                 isToday: i === 0
                             }))
                             .catch(error => ({ 
                                 dayIndex, 
-                                date, 
-                                dateStr, 
+                                date: normalizedDate, 
+                                dateKey, 
                                 error,
                                 isToday: i === 0
                             }))
@@ -2484,7 +2554,7 @@
 
                 const results = await Promise.all(promises);
                 
-                results.forEach(({ dayIndex, date, dateStr, docSnap, error, isToday }) => {
+                results.forEach(({ dayIndex, date, dateKey, docSnap, error, isToday }) => {
                     let dayPercentage = 0;
 
                     if (!error && docSnap && docSnap.exists()) {
@@ -2497,7 +2567,7 @@
                         }
                     }
 
-                    const dayBar = weeklyChart.querySelector(`[data-date="${dateStr}"]`);
+                    const dayBar = weeklyChart.querySelector(`[data-date="${dateKey}"]`);
                     if (dayBar) {
                         const barFill = dayBar.querySelector('.bar-fill');
                         const percentage = dayBar.querySelector('.bar-percentage');
@@ -2571,21 +2641,6 @@
             }
         }
 
-        // 데이터 일관성 체크 함수 추가
-        function validateDataConsistency() {
-            const displayedDate = currentDate.toISOString().split('T')[0];
-            const today = new Date().toISOString().split('T')[0];
-            
-            console.log(`📅 데이터 일관성 체크: 표시날짜=${displayedDate}, 오늘=${today}`);
-            
-            if (displayedDate !== today) {
-                console.warn(`⚠️ 표시된 날짜와 오늘 날짜가 다릅니다!`);
-            }
-            
-            return displayedDate;
-        }
-
-        // 이벤트 리스너 설정 (수정됨)
         function setupEventListeners() {
             console.log('🎛️ 이벤트 리스너 설정 시작');
             
@@ -2594,17 +2649,12 @@
 
             if (prevDayBtn) {
                 prevDayBtn.addEventListener('click', async () => {
-                    // 현재 날짜의 데이터를 먼저 저장
                     if (saveQueue.size > 0) {
-                        console.log('📤 이전 날짜로 이동하기 전 현재 데이터 저장...');
                         await processSaveQueue();
                     }
                     
-                    // 날짜 변경
                     currentDate.setDate(currentDate.getDate() - 1);
-                    console.log(`📅 날짜 변경: ${currentDate.toISOString().split('T')[0]}`);
-                    
-                    // 새로운 날짜의 UI 생성 및 데이터 로드
+                    currentDate = normalizeDate(currentDate);  // 날짜 정규화
                     generateChecklist();
                     if (firebaseInitialized) {
                         await Promise.all([
@@ -2617,17 +2667,12 @@
             
             if (nextDayBtn) {
                 nextDayBtn.addEventListener('click', async () => {
-                    // 현재 날짜의 데이터를 먼저 저장
                     if (saveQueue.size > 0) {
-                        console.log('📤 다음 날짜로 이동하기 전 현재 데이터 저장...');
                         await processSaveQueue();
                     }
                     
-                    // 날짜 변경
                     currentDate.setDate(currentDate.getDate() + 1);
-                    console.log(`📅 날짜 변경: ${currentDate.toISOString().split('T')[0]}`);
-                    
-                    // 새로운 날짜의 UI 생성 및 데이터 로드
+                    currentDate = normalizeDate(currentDate);  // 날짜 정규화
                     generateChecklist();
                     if (firebaseInitialized) {
                         await Promise.all([
@@ -2679,14 +2724,12 @@
                     }
 
                     if (firebaseInitialized) {
-                        // 현재 표시되고 있는 날짜에 체중 데이터 저장
-                        const targetDate = new Date(currentDate);
                         queueSave('weight', weight);
                         await processSaveQueue();
                         
                         weightSaveBtn.textContent = '✅ 저장됨';
                         weightSaveBtn.classList.add('saved');
-                        showNotification(`${targetDate.toISOString().split('T')[0]} 체중이 기록되었습니다!`, 'success');
+                        showNotification('체중이 기록되었습니다!', 'success');
                         
                         await updateWeightDisplay();
                         
@@ -2715,6 +2758,7 @@
             try {
                 updateCurrentTimeDisplay();
                 updateTaskHighlight();
+                checkDateChange();  // 날짜 변경 체크 추가
             } catch (error) {
                 console.error('초기 시간 업데이트 오류:', error);
             }
@@ -2723,6 +2767,7 @@
                 try {
                     updateCurrentTimeDisplay();
                     updateTaskHighlight();
+                    checkDateChange();  // 1분마다 날짜 변경 체크
                 } catch (error) {
                     console.error('시간 업데이트 오류:', error);
                 }
@@ -2733,6 +2778,9 @@
             console.log('🚀 앱 초기화 시작');
             
             try {
+                // 날짜 초기화를 가장 먼저 수행
+                initializeDate();
+                
                 console.log('🎛️ 기본 UI 초기화 중...');
                 setupEventListeners();
                 generateChecklist();
@@ -2830,6 +2878,7 @@
                 
                 try {
                     console.log('🆘 기본 UI 복구 시도...');
+                    initializeDate();
                     setupEventListeners();
                     generateChecklist();
                     await createWeeklyChart();
@@ -2879,9 +2928,11 @@
             showNotification('비동기 작업 오류가 발생했습니다', 'error');
         });
 
+        // 디버깅 도구 (날짜 관리 개선)
         window.debugApp = {
             firebaseStatus: () => firebaseInitialized,
-            currentDate: () => currentDate.toISOString().split('T')[0],
+            currentDate: () => getDateString(currentDate),
+            koreanTime: () => getCurrentKoreanDate().toISOString(),
             saveQueueSize: () => saveQueue.size,
             forceSave: () => processSaveQueue(),
             testConnection: () => testFirebaseConnection(),
@@ -2897,17 +2948,34 @@
                     console.warn('❌ Firebase가 초기화되지 않음');
                 }
             },
-            validateData: () => validateDataConsistency()
+            jumpToToday: () => {
+                currentDate = getCurrentKoreanDate();
+                generateChecklist();
+                if (firebaseInitialized) {
+                    loadChecklistData();
+                    updateWeightDisplay();
+                }
+                console.log(`📅 오늘로 이동: ${getDateString(currentDate)}`);
+            },
+            dateInfo: () => {
+                return {
+                    current: getDateString(currentDate),
+                    today: getDateString(getCurrentKoreanDate()),
+                    lastChecked: getDateString(lastCheckedDate)
+                };
+            }
         };
 
         console.log('📋 디버깅 도구 사용법:');
         console.log('- window.debugApp.firebaseStatus() : Firebase 연결 상태');
         console.log('- window.debugApp.currentDate() : 현재 선택된 날짜');
+        console.log('- window.debugApp.koreanTime() : 현재 한국 시간');
         console.log('- window.debugApp.saveQueueSize() : 저장 대기 중인 항목 수');
         console.log('- window.debugApp.forceSave() : 강제 저장');
         console.log('- window.debugApp.testConnection() : 연결 테스트');
         console.log('- window.debugApp.reloadData() : 데이터 강제 재로딩');
-        console.log('- window.debugApp.validateData() : 데이터 일관성 체크');
+        console.log('- window.debugApp.jumpToToday() : 오늘로 이동');
+        console.log('- window.debugApp.dateInfo() : 날짜 정보 확인');
     </script>
 </body>
 </html>
